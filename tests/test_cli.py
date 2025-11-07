@@ -184,3 +184,132 @@ def test_file_selection_logic_batch_markdown(tmp_path):
 
     assert len(files) == 3
     assert all(f.suffix == '.md' for f in files)
+
+# ===== Format Selection Tests (Task 2.6) =====
+
+def test_prompt_output_format_pdf():
+    """Test selecting PDF format"""
+    from md2pdf import prompt_output_format
+
+    config = {'output': {'format': 'pdf'}}
+
+    # Mock click.prompt to return 1 (PDF)
+    with patch('click.prompt', return_value=1):
+        result = prompt_output_format(config)
+        assert result == 'pdf'
+
+def test_prompt_output_format_html():
+    """Test selecting HTML format"""
+    from md2pdf import prompt_output_format
+
+    config = {'output': {'format': 'pdf'}}
+
+    # Mock click.prompt to return 2 (HTML)
+    with patch('click.prompt', return_value=2):
+        result = prompt_output_format(config)
+        assert result == 'html'
+
+def test_prompt_output_format_returns_string():
+    """Test that prompt_output_format returns a string"""
+    from md2pdf import prompt_output_format
+
+    config = {'output': {'format': 'pdf'}}
+    # Mock click.prompt to avoid interactive input
+    with patch('click.prompt', return_value=1):
+        result = prompt_output_format(config)
+        assert isinstance(result, str)
+        assert result in ['pdf', 'html']
+
+def test_prompt_output_format_handles_invalid_input():
+    """Test invalid input with retry"""
+    from md2pdf import prompt_output_format
+
+    config = {'output': {'format': 'pdf'}}
+
+    # Mock click.prompt to simulate invalid then valid input
+    with patch('click.prompt', side_effect=[5, 1]):  # 5 is invalid, 1 is valid
+        with patch('click.echo') as mock_echo:
+            result = prompt_output_format(config)
+            assert result == 'pdf'
+            # Should have shown error message
+            assert any('Invalid' in str(call) or '❌' in str(call)
+                      for call in mock_echo.call_args_list)
+
+# ===== Theme Selection Tests (Task 2.7) =====
+
+def test_prompt_theme_selection_academic():
+    """Test selecting academic theme"""
+    from md2pdf import prompt_theme_selection
+
+    config = {
+        'output': {'default_theme': 'academic'},
+        'themes': {
+            'academic': {'mermaid_theme': 'default'}
+        }
+    }
+
+    # Mock click.prompt to return 1 (academic)
+    with patch('click.prompt', return_value=1):
+        result = prompt_theme_selection(config)
+        assert result == 'academic'
+
+def test_prompt_theme_selection_modern():
+    """Test selecting modern theme"""
+    from md2pdf import prompt_theme_selection
+
+    config = {
+        'output': {'default_theme': 'academic'},
+        'themes': {
+            'modern': {'mermaid_theme': 'forest'}
+        }
+    }
+
+    # Mock list_themes to return predictable order
+    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']):
+        with patch('click.prompt', return_value=2):  # Select modern (2nd option)
+            result = prompt_theme_selection(config)
+            assert result == 'modern'
+
+def test_prompt_theme_selection_uses_theme_manager():
+    """Test uses theme_manager.list_themes()"""
+    from md2pdf import prompt_theme_selection
+
+    config = {'output': {'default_theme': 'academic'}}
+
+    # Mock list_themes to verify it's called
+    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']) as mock_list_themes:
+        with patch('click.prompt', return_value=1):
+            result = prompt_theme_selection(config)
+
+            # Verify list_themes was called
+            assert mock_list_themes.called
+            assert result == 'academic'
+
+def test_prompt_theme_selection_handles_invalid_input():
+    """Test invalid theme selection with retry"""
+    from md2pdf import prompt_theme_selection
+
+    config = {'output': {'default_theme': 'academic'}}
+
+    # Mock list_themes to return 4 themes
+    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']):
+        # Mock invalid input (5) then valid (1)
+        with patch('click.prompt', side_effect=[5, 1]):
+            with patch('click.echo') as mock_echo:
+                result = prompt_theme_selection(config)
+                assert result == 'academic'
+                # Should have shown error message
+                assert any('Invalid' in str(call) or '❌' in str(call)
+                          for call in mock_echo.call_args_list)
+
+def test_prompt_theme_selection_returns_string():
+    """Test that prompt_theme_selection returns a string"""
+    from md2pdf import prompt_theme_selection
+
+    config = {'output': {'default_theme': 'academic'}}
+
+    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']):
+        with patch('click.prompt', return_value=1):
+            result = prompt_theme_selection(config)
+            assert isinstance(result, str)
+            assert result in ['academic', 'modern', 'minimal', 'presentation']

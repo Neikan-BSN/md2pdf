@@ -130,16 +130,102 @@ def prompt_file_selection() -> List[Path]:
             return md_files
 
 def prompt_output_format(config: dict) -> str:
-    """Prompt user for output format (PDF or HTML)"""
-    # Placeholder - will be implemented in next task
-    click.echo("Format selection (placeholder)")
-    return config['output']['format']
+    """
+    Prompt user for output format (PDF or HTML).
+
+    Args:
+        config: Configuration dictionary with default format
+
+    Returns:
+        Selected format ('pdf' or 'html')
+
+    Examples:
+        Interactive menu:
+        1. PDF
+        2. HTML
+    """
+    click.echo("\n📄 Output Format")
+
+    default_format = config['output']['format']
+    default_num = 1 if default_format == 'pdf' else 2
+
+    while True:
+        click.echo("Select output format:")
+        click.echo("  1. PDF (print-ready)")
+        click.echo("  2. HTML (web-ready)")
+
+        choice = click.prompt(
+            "Format",
+            type=int,
+            default=default_num,
+            show_default=True
+        )
+
+        if choice == 1:
+            return 'pdf'
+        elif choice == 2:
+            return 'html'
+        else:
+            click.echo(f"❌ Invalid choice: {choice}. Please select 1 or 2.", err=True)
+            continue
 
 def prompt_theme_selection(config: dict) -> str:
-    """Prompt user for theme selection"""
-    # Placeholder - will be implemented in next task
-    click.echo("Theme selection (placeholder)")
-    return config['output']['default_theme']
+    """
+    Prompt user for theme selection.
+
+    Args:
+        config: Configuration dictionary with default theme
+
+    Returns:
+        Selected theme name
+
+    Examples:
+        Interactive menu:
+        1. Academic (serif, traditional)
+        2. Modern (sans-serif, colorful)
+        3. Minimal (clean, simple)
+        4. Presentation (large fonts, dark)
+    """
+    click.echo("\n🎨 Theme Selection")
+
+    # Get available themes from theme manager
+    themes = list_themes()
+
+    # Theme descriptions
+    descriptions = {
+        'academic': 'Serif, traditional scholarly style',
+        'modern': 'Sans-serif, colorful web style',
+        'minimal': 'Clean, simple, maximum readability',
+        'presentation': 'Large fonts, dark background'
+    }
+
+    # Find default theme index
+    default_theme = config['output']['default_theme']
+    try:
+        default_num = themes.index(default_theme) + 1
+    except ValueError:
+        default_num = 1
+
+    while True:
+        click.echo("Select theme:")
+        for i, theme in enumerate(themes, 1):
+            desc = descriptions.get(theme, '')
+            click.echo(f"  {i}. {theme.capitalize()} - {desc}")
+
+        choice = click.prompt(
+            "Theme",
+            type=int,
+            default=default_num,
+            show_default=True
+        )
+
+        if 1 <= choice <= len(themes):
+            selected_theme = themes[choice - 1]
+            click.echo(f"✓ Selected: {selected_theme}")
+            return selected_theme
+        else:
+            click.echo(f"❌ Invalid choice: {choice}. Please select 1-{len(themes)}.", err=True)
+            continue
 
 def prompt_filename(input_file: Path, output_format: str) -> str:
     """Prompt user for output filename (single file only)"""
