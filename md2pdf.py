@@ -146,7 +146,13 @@ def prompt_output_format(config: dict) -> str:
     """
     click.echo("\n📄 Output Format")
 
-    default_format = config['output']['format']
+    # Defensive: validate config structure
+    try:
+        default_format = config['output']['format']
+    except (KeyError, TypeError):
+        click.echo("⚠️  Warning: Invalid config, using default format (PDF)", err=True)
+        default_format = 'pdf'
+
     default_num = 1 if default_format == 'pdf' else 2
 
     while True:
@@ -188,8 +194,18 @@ def prompt_theme_selection(config: dict) -> str:
     """
     click.echo("\n🎨 Theme Selection")
 
-    # Get available themes from theme manager
-    themes = list_themes()
+    # Get available themes with error handling
+    try:
+        themes = list_themes()
+    except FileNotFoundError as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        click.echo("Using default theme: academic", err=True)
+        return 'academic'
+
+    if not themes:
+        click.echo("❌ Error: No themes found in themes directory", err=True)
+        click.echo("Using default theme: academic", err=True)
+        return 'academic'
 
     # Theme descriptions
     descriptions = {
@@ -199,8 +215,13 @@ def prompt_theme_selection(config: dict) -> str:
         'presentation': 'Large fonts, dark background'
     }
 
-    # Find default theme index
-    default_theme = config['output']['default_theme']
+    # Find default theme index with defensive config access
+    try:
+        default_theme = config['output']['default_theme']
+    except (KeyError, TypeError):
+        click.echo("⚠️  Warning: Invalid config, using default theme (academic)", err=True)
+        default_theme = 'academic'
+
     try:
         default_num = themes.index(default_theme) + 1
     except ValueError:
@@ -209,7 +230,7 @@ def prompt_theme_selection(config: dict) -> str:
     while True:
         click.echo("Select theme:")
         for i, theme in enumerate(themes, 1):
-            desc = descriptions.get(theme, '')
+            desc = descriptions.get(theme, 'Custom theme')
             click.echo(f"  {i}. {theme.capitalize()} - {desc}")
 
         choice = click.prompt(
