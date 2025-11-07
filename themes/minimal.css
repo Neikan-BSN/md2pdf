@@ -1,0 +1,70 @@
+/* Minimal Theme - Maximum readability, minimal decoration */
+
+.markdown-body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px;
+    color: #111;
+    background: #fff;
+}
+
+.markdown-body h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 28px;
+    margin-bottom: 14px;
+}
+
+.markdown-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 22px;
+    margin-bottom: 11px;
+}
+
+.markdown-body h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 18px;
+    margin-bottom: 9px;
+}
+
+.markdown-body p {
+    margin-bottom: 14px;
+}
+
+.markdown-body pre {
+    background: #f5f5f5;
+    padding: 12px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.markdown-body code {
+    font-family: monospace;
+    background: #f0f0f0;
+    padding: 2px 4px;
+}
+
+.markdown-body .mermaid {
+    margin: 20px 0;
+}
+
+.markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 14px 0;
+}
+
+.markdown-body th, .markdown-body td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.markdown-body th {
+    font-weight: 700;
+}

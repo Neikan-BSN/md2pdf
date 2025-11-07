@@ -1,0 +1,83 @@
+/* Presentation Theme - Large fonts for screen display */
+
+.markdown-body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 24px;
+    line-height: 1.6;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px;
+    color: #e0e0e0;
+    background: #1a1a1a;
+}
+
+.markdown-body h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: #4fc3f7;
+}
+
+.markdown-body h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    color: #81c784;
+}
+
+.markdown-body h3 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    color: #ffb74d;
+}
+
+.markdown-body p {
+    margin-bottom: 20px;
+}
+
+.markdown-body pre {
+    background: #2d2d2d;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 18px;
+    border: 1px solid #444;
+}
+
+.markdown-body code {
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    background: #2d2d2d;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 90%;
+}
+
+.markdown-body .mermaid {
+    text-align: center;
+    margin: 30px 0;
+    background: #2d2d2d;
+    padding: 30px;
+    border-radius: 8px;
+}
+
+.markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.markdown-body th, .markdown-body td {
+    border: 1px solid #444;
+    padding: 16px;
+    text-align: left;
+}
+
+.markdown-body th {
+    background: #2d2d2d;
+    font-weight: 700;
+}
