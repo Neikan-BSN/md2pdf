@@ -1,0 +1,49 @@
+# md2pdf Configuration
+
+output:
+  # Default output format: pdf or html
+  format: pdf
+
+  # Default theme: academic, modern, minimal, presentation
+  default_theme: academic
+
+pdf_options:
+  # Page size: letter, a4, legal
+  page_size: letter
+
+  # Page margins (CSS units)
+  margins:
+    top: 1in
+    bottom: 1in
+    left: 1in
+    right: 1in
+
+  # Print background graphics
+  print_background: true
+
+  # Display header and footer
+  display_header_footer: false
+
+rendering:
+  # Math rendering engine: katex or mathjax
+  math_engine: katex
+
+  # Default Mermaid theme
+  mermaid_theme: default
+
+  # Enable syntax highlighting
+  syntax_highlighting: true
+
+  # Wait time for diagram rendering (milliseconds)
+  wait_for_rendering: 1000
+
+# Theme-specific Mermaid configurations
+themes:
+  academic:
+    mermaid_theme: default
+  modern:
+    mermaid_theme: forest
+  minimal:
+    mermaid_theme: neutral
+  presentation:
+    mermaid_theme: dark
