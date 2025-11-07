@@ -7,7 +7,7 @@ math equations, and syntax highlighting to PDF or HTML.
 """
 
 import click
-import glob as glob_module
+import glob
 from pathlib import Path
 from typing import List, Optional
 from config_loader import load_config
@@ -65,7 +65,7 @@ def glob_files(pattern: str) -> List[Path]:
         return [direct_path]
 
     # Use glob to find matching files
-    matches = glob_module.glob(pattern, recursive=True)
+    matches = glob.glob(pattern, recursive=True)
 
     # Convert to Path objects and filter for files only
     files = [Path(m) for m in matches if Path(m).is_file()]
