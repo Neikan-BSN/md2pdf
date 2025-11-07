@@ -248,12 +248,62 @@ def prompt_theme_selection(config: dict) -> str:
             click.echo(f"❌ Invalid choice: {choice}. Please select 1-{len(themes)}.", err=True)
             continue
 
+def prompt_filename_default(input_file: Path, output_format: str) -> str:
+    """
+    Generate default output filename.
+
+    Args:
+        input_file: Input file path
+        output_format: Output format ('pdf' or 'html')
+
+    Returns:
+        Default filename with correct extension
+
+    Examples:
+        >>> prompt_filename_default(Path("doc.md"), "pdf")
+        'doc.pdf'
+
+        >>> prompt_filename_default(Path("notes.md"), "html")
+        'notes.html'
+    """
+    return f"{input_file.stem}.{output_format}"
+
 def prompt_filename(input_file: Path, output_format: str) -> str:
-    """Prompt user for output filename (single file only)"""
-    # Placeholder - will be implemented in next task
-    default = f"{input_file.stem}.{output_format}"
-    click.echo(f"Filename prompt (placeholder): {default}")
-    return default
+    """
+    Prompt user for output filename (single file only).
+
+    Args:
+        input_file: Input file path
+        output_format: Output format ('pdf' or 'html')
+
+    Returns:
+        Output filename (with extension)
+
+    Examples:
+        Interactive flow:
+        - Shows default: "document.pdf"
+        - Asks: "Use default filename? [Y/n]"
+        - If yes: returns default
+        - If no: prompts for custom name
+    """
+    click.echo("\n📝 Output Filename")
+
+    default_filename = prompt_filename_default(input_file, output_format)
+    click.echo(f"Default: {default_filename}")
+
+    if click.confirm("Use default filename?", default=True):
+        return default_filename
+
+    # Prompt for custom filename
+    while True:
+        custom_name = click.prompt("Custom filename", type=str)
+
+        # Ensure extension matches output format
+        if not custom_name.endswith(f".{output_format}"):
+            click.echo(f"⚠️  Warning: Adding .{output_format} extension", err=True)
+            custom_name = f"{custom_name}.{output_format}"
+
+        return custom_name
 
 def process_conversion(
     files: List[Path],
@@ -262,9 +312,43 @@ def process_conversion(
     filename: Optional[str],
     config: dict
 ):
-    """Process file conversion (placeholder)"""
-    # Placeholder - will be integrated in later task
-    click.echo(f"Processing {len(files)} file(s) with {theme} theme to {output_format}")
+    """
+    Process file conversion (creates output directory structure).
+
+    Args:
+        files: List of input files
+        output_format: Output format ('pdf' or 'html')
+        theme: Selected theme name
+        filename: Custom filename (single file only, None for batch)
+        config: Configuration dictionary
+
+    Note:
+        Output directory structure:
+        - Single file: {input_dir}/converted/{filename}
+        - Batch mode: {input_dir}/converted/{stem}.{format}
+    """
+    click.echo(f"\n🔄 Processing {len(files)} file(s)")
+    click.echo(f"Format: {output_format}, Theme: {theme}")
+
+    for file in files:
+        # Create converted/ subdirectory
+        output_dir = file.parent / "converted"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Determine output filename
+        if filename and len(files) == 1:
+            output_path = output_dir / filename
+        else:
+            # Batch mode: use default names
+            default_name = prompt_filename_default(file, output_format)
+            output_path = output_dir / default_name
+
+        click.echo(f"  {file.name} → {output_path.relative_to(file.parent)}")
+
+        # TODO: Actual conversion will be implemented in Phase 3
+        # For now, just show what would be processed
+
+    click.echo("✓ Output paths created")
 
 def main():
     """Main entry point"""
