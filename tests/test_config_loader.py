@@ -22,8 +22,8 @@ def test_validate_config_valid():
     """Test validation of valid config"""
     config = {
         'output': {'format': 'pdf', 'default_theme': 'academic'},
-        'pdf_options': {'page_size': 'letter'},
-        'rendering': {'math_engine': 'katex'},
+        'pdf_options': {'page_size': 'letter', 'margins': {}},
+        'rendering': {'math_engine': 'katex', 'mermaid_theme': 'default'},
         'themes': {}
     }
     assert validate_config(config) == True
@@ -31,6 +31,36 @@ def test_validate_config_valid():
 def test_validate_config_missing_required():
     """Test validation fails for missing required fields"""
     config = {'output': {}}
+    assert validate_config(config) == False
+
+def test_validate_config_invalid_format():
+    """Test validation fails for invalid output format"""
+    config = {
+        'output': {'format': 'invalid', 'default_theme': 'academic'},
+        'pdf_options': {'page_size': 'letter', 'margins': {}},
+        'rendering': {'math_engine': 'katex', 'mermaid_theme': 'default'},
+        'themes': {}
+    }
+    assert validate_config(config) == False
+
+def test_validate_config_missing_nested_keys():
+    """Test validation fails for missing nested keys"""
+    config = {
+        'output': {'format': 'pdf', 'default_theme': 'academic'},
+        'pdf_options': {'page_size': 'letter'},  # Missing margins
+        'rendering': {'math_engine': 'katex', 'mermaid_theme': 'default'},
+        'themes': {}
+    }
+    assert validate_config(config) == False
+
+def test_validate_config_wrong_types():
+    """Test validation fails for wrong types"""
+    config = {
+        'output': 'not_a_dict',  # Should be dict
+        'pdf_options': {'page_size': 'letter', 'margins': {}},
+        'rendering': {'math_engine': 'katex', 'mermaid_theme': 'default'},
+        'themes': {}
+    }
     assert validate_config(config) == False
 
 def test_get_theme_config():
