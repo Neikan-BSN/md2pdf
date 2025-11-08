@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  md2pdf:
+    build: .
+    image: md2pdf:latest
+    container_name: md2pdf
+    volumes:
+      # Mount current directory to /data for file access
+      - ./:/data
+    stdin_open: true
+    tty: true
+    environment:
+      - DOCKER=true
+      - PORT=3000
+    command: >
+      sh -c "echo 'md2pdf container ready. Run: docker-compose run md2pdf' && tail -f /dev/null"
+
+  # Optional: Run as one-shot conversion
+  md2pdf-convert:
+    build: .
+    image: md2pdf:latest
+    volumes:
+      - ./:/data
+    stdin_open: true
+    tty: true
+    environment:
+      - DOCKER=true
+    profiles:
+      - convert
