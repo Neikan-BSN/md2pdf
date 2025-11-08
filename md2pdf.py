@@ -10,8 +10,11 @@ import click
 import glob
 from pathlib import Path
 from typing import List, Optional
+from jinja2 import Template
 from config_loader import load_config
-from theme_manager import list_themes
+from theme_manager import list_themes, load_theme_css, ThemeManager
+from markdown_renderer import render_markdown, extract_title
+from renderer_client import RendererClient, RendererServerError
 
 @click.command()
 @click.option('--config', type=click.Path(exists=True), help='Path to config file')
@@ -313,42 +316,112 @@ def process_conversion(
     config: dict
 ):
     """
-    Process file conversion (creates output directory structure).
+    Process file conversion (markdown to PDF/HTML).
 
     Args:
-        files: List of input files
+        files: List of input markdown files
         output_format: Output format ('pdf' or 'html')
         theme: Selected theme name
         filename: Custom filename (single file only, None for batch)
         config: Configuration dictionary
-
-    Note:
-        Output directory structure:
-        - Single file: {input_dir}/converted/{filename}
-        - Batch mode: {input_dir}/converted/{stem}.{format}
     """
     click.echo(f"\n🔄 Processing {len(files)} file(s)")
     click.echo(f"Format: {output_format}, Theme: {theme}")
 
+    # Load theme CSS
+    try:
+        theme_css = load_theme_css(theme)
+    except FileNotFoundError as e:
+        click.echo(f"❌ Error loading theme: {e}", err=True)
+        return
+
+    # Get Mermaid theme from config
+    theme_manager = ThemeManager(config)
+    mermaid_theme = theme_manager.get_mermaid_theme(theme)
+
+    # Load HTML template
+    template_path = Path(__file__).parent / "templates" / "base.html"
+    if not template_path.exists():
+        click.echo(f"❌ Error: Template not found: {template_path}", err=True)
+        return
+
+    with open(template_path, 'r', encoding='utf-8') as f:
+        template = Template(f.read())
+
+    # Start renderer service for PDF conversion
+    client = None
+    if output_format == 'pdf':
+        click.echo("\n🚀 Starting renderer service...")
+        client = RendererClient()
+        try:
+            client.start_server()
+            click.echo("✓ Renderer service ready")
+        except RendererServerError as e:
+            click.echo(f"❌ Failed to start renderer: {e}", err=True)
+            return
+
+    # Process each file
+    success_count = 0
+    error_count = 0
+
     for file in files:
-        # Create converted/ subdirectory
-        output_dir = file.parent / "converted"
-        output_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            # Read markdown file
+            md_content = file.read_text(encoding='utf-8')
 
-        # Determine output filename
-        if filename and len(files) == 1:
-            output_path = output_dir / filename
-        else:
-            # Batch mode: use default names
-            default_name = prompt_filename_default(file, output_format)
-            output_path = output_dir / default_name
+            # Convert markdown to HTML
+            html_content = render_markdown(md_content)
+            title = extract_title(md_content)
 
-        click.echo(f"  {file.name} → {output_path.relative_to(file.parent)}")
+            # Render with template
+            full_html = template.render(
+                title=title,
+                content=html_content,
+                theme_css=theme_css,
+                mermaid_theme=mermaid_theme
+            )
 
-        # TODO: Actual conversion will be implemented in Phase 3
-        # For now, just show what would be processed
+            # Create output directory
+            output_dir = file.parent / "converted"
+            output_dir.mkdir(parents=True, exist_ok=True)
 
-    click.echo("✓ Output paths created")
+            # Determine output filename
+            if filename and len(files) == 1:
+                output_path = output_dir / filename
+            else:
+                default_name = prompt_filename_default(file, output_format)
+                output_path = output_dir / default_name
+
+            # Render to PDF or save HTML
+            if output_format == 'pdf':
+                pdf_bytes = client.render_pdf(full_html, options={
+                    'pageSize': config.get('pdf_options', {}).get('page_size', 'Letter'),
+                    'margins': config.get('pdf_options', {}).get('margins', {
+                        'top': '1in', 'bottom': '1in', 'left': '1in', 'right': '1in'
+                    }),
+                    'printBackground': config.get('pdf_options', {}).get('print_background', True),
+                    'waitForRendering': config.get('rendering', {}).get('wait_for_rendering', 1000)
+                })
+                output_path.write_bytes(pdf_bytes)
+            else:  # html
+                output_path.write_text(full_html, encoding='utf-8')
+
+            # Success
+            file_size = output_path.stat().st_size
+            click.echo(f"  ✓ {file.name} → {output_path.relative_to(file.parent)} ({file_size:,} bytes)")
+            success_count += 1
+
+        except Exception as e:
+            click.echo(f"  ✗ {file.name} - Error: {e}", err=True)
+            error_count += 1
+
+    # Stop renderer service
+    if client is not None:
+        client.stop_server()
+        click.echo("\n✓ Renderer service stopped")
+
+    # Summary
+    click.echo(f"\n📊 Conversion complete: {success_count} succeeded, {error_count} failed")
 
 def main():
     """Main entry point"""
