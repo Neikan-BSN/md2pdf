@@ -1,13 +1,54 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Detect if running in Docker
+const isDocker = process.env.DOCKER === 'true' || fs.existsSync('/.dockerenv');
+
+if (isDocker) {
+    console.log('⚠️  Running in Docker: Sandbox disabled for compatibility');
+}
+
+// Concurrency limiting
+const MAX_CONCURRENT_RENDERS = 3;
+let activeRenders = 0;
+
 // Middleware
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+
+// Request timeout middleware
+const TIMEOUT_MS = 60000; // 60 seconds
+
+app.use((req, res, next) => {
+    req.setTimeout(TIMEOUT_MS, () => {
+        console.error('Request timeout:', req.path);
+        if (!res.headersSent) {
+            res.status(504).json({
+                error: 'Request timeout',
+                message: 'Request exceeded maximum processing time (60s)'
+            });
+        }
+    });
+
+    res.setTimeout(TIMEOUT_MS);
+    next();
+});
+
+// Concurrency limiting middleware for render endpoints
+app.use('/render/*', (req, res, next) => {
+    if (activeRenders >= MAX_CONCURRENT_RENDERS) {
+        return res.status(503).json({
+            error: 'Service busy',
+            message: `Too many concurrent requests (${activeRenders}/${MAX_CONCURRENT_RENDERS}). Please retry later.`
+        });
+    }
+    next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -41,13 +82,14 @@ app.post('/render/pdf', async (req, res) => {
         });
     }
 
+    activeRenders++;
     let browser = null;
 
     try {
         // Launch Puppeteer
         browser = await puppeteer.launch({
             headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: isDocker ? ['--no-sandbox', '--disable-setuid-sandbox'] : []
         });
 
         const page = await browser.newPage();
@@ -76,9 +118,6 @@ app.post('/render/pdf', async (req, res) => {
         // Generate PDF
         const pdfBuffer = await page.pdf(pdfOptions);
 
-        // Close browser
-        await browser.close();
-
         // Send PDF as response
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Length', pdfBuffer.length);
@@ -87,14 +126,22 @@ app.post('/render/pdf', async (req, res) => {
     } catch (error) {
         console.error('PDF rendering error:', error);
 
-        if (browser) {
-            await browser.close();
+        if (!res.headersSent) {
+            res.status(500).json({
+                error: 'PDF rendering failed',
+                message: error.message
+            });
         }
-
-        res.status(500).json({
-            error: 'PDF rendering failed',
-            message: error.message
-        });
+    } finally {
+        activeRenders--;
+        // Always cleanup browser resources
+        if (browser) {
+            try {
+                await browser.close();
+            } catch (closeError) {
+                console.error('Browser cleanup error:', closeError);
+            }
+        }
     }
 });
 
