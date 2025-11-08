@@ -8,6 +8,9 @@ and extract document titles from Markdown headings.
 from markdown_it import MarkdownIt
 import re
 
+# Module-level MarkdownIt instance for better performance
+_markdown_parser = MarkdownIt()
+
 
 def render_markdown(md_content: str) -> str:
     """
@@ -33,8 +36,7 @@ def render_markdown(md_content: str) -> str:
     if not md_content:
         return ""
 
-    md = MarkdownIt()
-    return md.render(md_content)
+    return _markdown_parser.render(md_content)
 
 
 def extract_title(md_content: str) -> str:

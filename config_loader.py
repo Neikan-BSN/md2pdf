@@ -26,7 +26,7 @@ def load_config(config_path: Optional[Path] = None) -> Dict[str, Any]:
     if not config_path.exists():
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
 
     return config
@@ -42,16 +42,37 @@ def validate_config(config: Dict[str, Any]) -> bool:
     Returns:
         True if valid, False otherwise
     """
+    # Check top-level keys
     required_keys = ['output', 'pdf_options', 'rendering', 'themes']
-
-    for key in required_keys:
-        if key not in config:
-            return False
+    if not all(k in config for k in required_keys):
+        return False
 
     # Validate output section
-    if 'format' not in config['output']:
+    output = config.get('output', {})
+    if not isinstance(output, dict):
         return False
-    if 'default_theme' not in config['output']:
+    if 'format' not in output or 'default_theme' not in output:
+        return False
+    if output['format'] not in ['pdf', 'html']:
+        return False
+
+    # Validate pdf_options section
+    pdf_opts = config.get('pdf_options', {})
+    if not isinstance(pdf_opts, dict):
+        return False
+    if 'page_size' not in pdf_opts or 'margins' not in pdf_opts:
+        return False
+
+    # Validate rendering section
+    rendering = config.get('rendering', {})
+    if not isinstance(rendering, dict):
+        return False
+    if 'math_engine' not in rendering or 'mermaid_theme' not in rendering:
+        return False
+
+    # Validate themes section
+    themes = config.get('themes', {})
+    if not isinstance(themes, dict):
         return False
 
     return True
