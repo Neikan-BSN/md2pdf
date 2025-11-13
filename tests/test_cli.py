@@ -184,3 +184,44 @@ def test_file_selection_logic_batch_markdown(tmp_path):
 
     assert len(files) == 3
     assert all(f.suffix == '.md' for f in files)
+
+# ===== Task 1: Interactive Output Format Prompt Tests =====
+
+def test_prompt_output_format_pdf_selection(monkeypatch):
+    """Test user selects PDF format"""
+    from md2pdf import prompt_output_format
+
+    # Mock user input: select PDF (option 1)
+    inputs = iter(['1'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    config = {'output': {'format': 'pdf'}}
+    result = prompt_output_format(config)
+
+    assert result == 'pdf'
+
+def test_prompt_output_format_html_selection(monkeypatch):
+    """Test user selects HTML format"""
+    from md2pdf import prompt_output_format
+
+    # Mock user input: select HTML (option 2)
+    inputs = iter(['2'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    config = {'output': {'format': 'pdf'}}
+    result = prompt_output_format(config)
+
+    assert result == 'html'
+
+def test_prompt_output_format_invalid_then_valid(monkeypatch):
+    """Test invalid input then valid selection"""
+    from md2pdf import prompt_output_format
+
+    # Mock user input: invalid, then valid
+    inputs = iter(['5', '1'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    config = {'output': {'format': 'pdf'}}
+    result = prompt_output_format(config)
+
+    assert result == 'pdf'

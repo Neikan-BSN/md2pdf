@@ -130,10 +130,35 @@ def prompt_file_selection() -> List[Path]:
             return md_files
 
 def prompt_output_format(config: dict) -> str:
-    """Prompt user for output format (PDF or HTML)"""
-    # Placeholder - will be implemented in next task
-    click.echo("Format selection (placeholder)")
-    return config['output']['format']
+    """
+    Prompt user for output format (PDF or HTML).
+
+    Args:
+        config: Configuration dictionary
+
+    Returns:
+        Selected format: 'pdf' or 'html'
+    """
+    click.echo("\n📄 Output Format Selection")
+    click.echo("1. PDF (portable document)")
+    click.echo("2. HTML (web page)")
+
+    default_format = config['output']['format']
+    default_num = '1' if default_format == 'pdf' else '2'
+
+    while True:
+        choice = input(f"Select format [1-2] (default: {default_num}): ").strip()
+
+        # Use default if empty
+        if not choice:
+            choice = default_num
+
+        if choice == '1':
+            return 'pdf'
+        elif choice == '2':
+            return 'html'
+        else:
+            click.echo("❌ Invalid choice. Please enter 1 or 2.", err=True)
 
 def prompt_theme_selection(config: dict) -> str:
     """Prompt user for theme selection"""
