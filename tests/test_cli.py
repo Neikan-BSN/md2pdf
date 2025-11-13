@@ -123,13 +123,18 @@ def test_glob_files_single_file(tmp_path):
     assert files[0] == test_file
 
 @patch('md2pdf.prompt_file_selection')
-def test_prompt_file_selection_integration_single_file(mock_files, tmp_path):
+@patch('md2pdf.prompt_output_format')
+@patch('md2pdf.prompt_theme_selection')
+@patch('md2pdf.process_conversion')
+def test_prompt_file_selection_integration_single_file(mock_process, mock_theme, mock_format, mock_files, tmp_path):
     """Test file selection integration with single file"""
     test_file = tmp_path / "test.md"
     test_file.write_text("# Test")
 
     # Mock the function to return our test file
     mock_files.return_value = [test_file]
+    mock_format.return_value = 'pdf'
+    mock_theme.return_value = 'academic'
 
     # Verify the mock works in CLI context
     runner = CliRunner()
@@ -139,7 +144,10 @@ def test_prompt_file_selection_integration_single_file(mock_files, tmp_path):
     assert mock_files.called
 
 @patch('md2pdf.prompt_file_selection')
-def test_prompt_file_selection_integration_batch(mock_files, tmp_path):
+@patch('md2pdf.prompt_output_format')
+@patch('md2pdf.prompt_theme_selection')
+@patch('md2pdf.process_conversion')
+def test_prompt_file_selection_integration_batch(mock_process, mock_theme, mock_format, mock_files, tmp_path):
     """Test file selection integration with batch mode"""
     # Create multiple test files
     files = [
@@ -152,6 +160,8 @@ def test_prompt_file_selection_integration_batch(mock_files, tmp_path):
 
     # Mock the function to return multiple files
     mock_files.return_value = files
+    mock_format.return_value = 'html'
+    mock_theme.return_value = 'modern'
 
     runner = CliRunner()
     result = runner.invoke(cli)
