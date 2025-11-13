@@ -235,3 +235,48 @@ def test_prompt_output_format_invalid_then_valid(monkeypatch):
     result = prompt_output_format(config)
 
     assert result == 'pdf'
+
+# ===== Task 2: Interactive Theme Selection Prompt Tests =====
+
+def test_prompt_theme_selection_valid(monkeypatch):
+    """Test user selects valid theme"""
+    from md2pdf import prompt_theme_selection
+    from theme_manager import list_themes
+
+    # Mock user input: select first theme
+    inputs = iter(['1'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    config = {'output': {'default_theme': 'academic'}}
+    result = prompt_theme_selection(config)
+
+    themes = list_themes()
+    assert result in themes
+
+def test_prompt_theme_selection_default(monkeypatch):
+    """Test user accepts default theme"""
+    from md2pdf import prompt_theme_selection
+
+    # Mock user input: empty (default)
+    inputs = iter([''])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    config = {'output': {'default_theme': 'academic'}}
+    result = prompt_theme_selection(config)
+
+    assert result == 'academic'
+
+def test_prompt_theme_selection_invalid_then_valid(monkeypatch):
+    """Test invalid input then valid selection"""
+    from md2pdf import prompt_theme_selection
+
+    # Mock user input: invalid, then valid
+    inputs = iter(['99', '1'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    config = {'output': {'default_theme': 'academic'}}
+    result = prompt_theme_selection(config)
+
+    # Should return a valid theme
+    from theme_manager import list_themes
+    assert result in list_themes()

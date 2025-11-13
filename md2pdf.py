@@ -161,10 +161,46 @@ def prompt_output_format(config: dict) -> str:
             click.echo("❌ Invalid choice. Please enter 1 or 2.", err=True)
 
 def prompt_theme_selection(config: dict) -> str:
-    """Prompt user for theme selection"""
-    # Placeholder - will be implemented in next task
-    click.echo("Theme selection (placeholder)")
-    return config['output']['default_theme']
+    """
+    Prompt user for theme selection.
+
+    Args:
+        config: Configuration dictionary
+
+    Returns:
+        Selected theme name
+    """
+    click.echo("\n🎨 Theme Selection")
+
+    themes = list_themes()
+    default_theme = config['output']['default_theme']
+
+    # Display themes with numbers
+    for idx, theme in enumerate(themes, 1):
+        default_marker = " (default)" if theme == default_theme else ""
+        click.echo(f"{idx}. {theme}{default_marker}")
+
+    # Find default theme number
+    try:
+        default_num = str(themes.index(default_theme) + 1)
+    except ValueError:
+        default_num = '1'
+
+    while True:
+        choice = input(f"Select theme [1-{len(themes)}] (default: {default_num}): ").strip()
+
+        # Use default if empty
+        if not choice:
+            choice = default_num
+
+        try:
+            theme_idx = int(choice) - 1
+            if 0 <= theme_idx < len(themes):
+                return themes[theme_idx]
+            else:
+                click.echo(f"❌ Invalid choice. Please enter 1-{len(themes)}.", err=True)
+        except ValueError:
+            click.echo(f"❌ Invalid choice. Please enter a number 1-{len(themes)}.", err=True)
 
 def prompt_filename(input_file: Path, output_format: str) -> str:
     """Prompt user for output filename (single file only)"""
