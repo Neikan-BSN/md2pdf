@@ -419,3 +419,84 @@ def test_process_conversion_html_creates_file(tmp_path, monkeypatch):
     content = output_file.read_text()
     assert '<!DOCTYPE html>' in content
     assert '<h1>Test Document</h1>' in content
+
+
+# ===== Task 7: Full CLI Integration Tests =====
+
+@pytest.fixture
+def runner():
+    """Provide Click CLI test runner"""
+    return CliRunner()
+
+
+def test_full_cli_integration_pdf(tmp_path, monkeypatch, runner):
+    """Test complete CLI flow for PDF generation"""
+    from md2pdf import cli
+
+    # Create test markdown file
+    md_file = tmp_path / "integration_test.md"
+    md_file.write_text("""# Integration Test Document
+
+This is a test document with:
+
+## Features
+- Lists
+- **Bold text**
+- *Italic text*
+
+## Code
+```python
+def hello():
+    print("world")
+```
+
+## Math
+The equation is $E = mc^2$
+""")
+
+    # Change to tmp_path
+    monkeypatch.chdir(tmp_path)
+
+    # Prepare user inputs for Click prompts
+    # Format: file path, confirm (y), format choice (1), theme choice (1), filename (empty for default)
+    user_input = f"{str(md_file)}\ny\n1\n1\n\n"
+
+    # Run CLI with input
+    result = runner.invoke(cli, [], input=user_input)
+
+    # Check success
+    assert result.exit_code == 0
+    assert '✓ Conversion complete!' in result.output
+
+    # Check PDF created
+    pdf_file = tmp_path / "integration_test.pdf"
+    assert pdf_file.exists()
+    assert pdf_file.stat().st_size > 0
+
+
+def test_full_cli_integration_html(tmp_path, monkeypatch, runner):
+    """Test complete CLI flow for HTML generation"""
+    from md2pdf import cli
+
+    # Create test markdown file
+    md_file = tmp_path / "integration_test.md"
+    md_file.write_text("# Test\n\nContent")
+
+    # Change to tmp_path
+    monkeypatch.chdir(tmp_path)
+
+    # Prepare user inputs for Click prompts
+    # Format: file path, confirm (y), format choice (2), theme choice (1), filename (custom)
+    user_input = f"{str(md_file)}\ny\n2\n1\ncustom-output.html\n"
+
+    # Run CLI with input
+    result = runner.invoke(cli, [], input=user_input)
+
+    # Check success
+    assert result.exit_code == 0
+
+    # Check HTML created with custom name
+    html_file = tmp_path / "custom-output.html"
+    assert html_file.exists()
+    content = html_file.read_text()
+    assert '<!DOCTYPE html>' in content
