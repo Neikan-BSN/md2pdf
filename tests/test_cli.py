@@ -344,3 +344,78 @@ def test_prompt_filename_wrong_extension_corrected(monkeypatch):
 
     # Should correct extension to pdf
     assert result == "output.pdf"
+
+
+# ===== Task 5: Process Conversion Integration Tests =====
+
+def test_process_conversion_pdf_creates_file(tmp_path, monkeypatch):
+    """Test PDF conversion creates output file"""
+    from md2pdf import process_conversion
+    from pathlib import Path
+
+    # Create test markdown file
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Test Document\n\nContent here")
+
+    config = {
+        'rendering': {'mermaid_theme': 'default'},
+        'pdf_options': {
+            'page_size': 'letter',
+            'margins': {'top': '1in', 'bottom': '1in', 'left': '1in', 'right': '1in'},
+            'print_background': True
+        }
+    }
+
+    # Mock output path
+    output_file = tmp_path / "output.pdf"
+
+    # Change to tmp_path directory
+    monkeypatch.chdir(tmp_path)
+
+    # Process conversion
+    process_conversion(
+        files=[md_file],
+        output_format='pdf',
+        theme='academic',
+        filename='output.pdf',
+        config=config
+    )
+
+    # Check file created
+    assert output_file.exists()
+    assert output_file.stat().st_size > 0
+
+
+def test_process_conversion_html_creates_file(tmp_path, monkeypatch):
+    """Test HTML conversion creates output file"""
+    from md2pdf import process_conversion
+    from pathlib import Path
+
+    # Create test markdown file
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Test Document\n\nContent here")
+
+    config = {
+        'rendering': {'mermaid_theme': 'default'}
+    }
+
+    # Mock output path
+    output_file = tmp_path / "output.html"
+
+    # Change to tmp_path directory
+    monkeypatch.chdir(tmp_path)
+
+    # Process conversion
+    process_conversion(
+        files=[md_file],
+        output_format='html',
+        theme='academic',
+        filename='output.html',
+        config=config
+    )
+
+    # Check file created
+    assert output_file.exists()
+    content = output_file.read_text()
+    assert '<!DOCTYPE html>' in content
+    assert '<h1>Test Document</h1>' in content

@@ -243,9 +243,67 @@ def process_conversion(
     filename: Optional[str],
     config: dict
 ):
-    """Process file conversion (placeholder)"""
-    # Placeholder - will be integrated in later task
-    click.echo(f"Processing {len(files)} file(s) with {theme} theme to {output_format}")
+    """
+    Process file conversion.
+
+    Args:
+        files: List of markdown files to convert
+        output_format: Output format ('pdf' or 'html')
+        theme: Theme name
+        filename: Output filename (for single file) or None (for batch)
+        config: Configuration dictionary
+    """
+    from document_builder import build_html_document
+    from renderer_client import RendererClient
+
+    for idx, md_file in enumerate(files):
+        click.echo(f"\n📄 Processing: {md_file.name}")
+
+        # Read markdown content
+        md_content = md_file.read_text(encoding='utf-8')
+
+        # Build HTML document
+        html = build_html_document(md_content, theme, config)
+
+        # Determine output filename
+        if filename and len(files) == 1:
+            # Single file with custom filename
+            output_name = filename
+        else:
+            # Batch mode or default: use input filename with new extension
+            output_name = f"{md_file.stem}.{output_format}"
+
+        output_path = Path(output_name)
+
+        # Convert based on format
+        if output_format == 'pdf':
+            click.echo(f"  ⚙️  Converting to PDF...")
+
+            # Prepare PDF options
+            pdf_opts = config.get('pdf_options', {})
+            render_options = {
+                'format': pdf_opts.get('page_size', 'letter'),
+                'printBackground': pdf_opts.get('print_background', True),
+                'margin': pdf_opts.get('margins', {
+                    'top': '1in',
+                    'bottom': '1in',
+                    'left': '1in',
+                    'right': '1in'
+                })
+            }
+
+            # Use renderer client
+            with RendererClient() as client:
+                pdf_bytes = client.render_pdf(html, render_options)
+
+            # Write PDF
+            output_path.write_bytes(pdf_bytes)
+
+        else:  # html
+            click.echo(f"  ⚙️  Saving HTML...")
+            output_path.write_text(html, encoding='utf-8')
+
+        click.echo(f"  ✅ Saved: {output_path}")
 
 def main():
     """Main entry point"""
