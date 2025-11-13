@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import List, Optional
 from config_loader import load_config
 from theme_manager import list_themes
+from document_builder import build_html_document
+from renderer_client import RendererClient
 
 @click.command()
 @click.option('--config', type=click.Path(exists=True), help='Path to config file')
@@ -253,9 +255,6 @@ def process_conversion(
         filename: Output filename (for single file) or None (for batch)
         config: Configuration dictionary
     """
-    from document_builder import build_html_document
-    from renderer_client import RendererClient
-
     for idx, md_file in enumerate(files):
         click.echo(f"\n📄 Processing: {md_file.name}")
 
