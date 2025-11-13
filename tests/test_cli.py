@@ -24,8 +24,9 @@ def test_main_entry_point():
 @patch('md2pdf.prompt_file_selection')
 @patch('md2pdf.prompt_output_format')
 @patch('md2pdf.prompt_theme_selection')
+@patch('md2pdf.prompt_filename')
 @patch('md2pdf.process_conversion')
-def test_cli_interactive_flow_single_file(mock_process, mock_theme, mock_format, mock_files):
+def test_cli_interactive_flow_single_file(mock_process, mock_filename, mock_theme, mock_format, mock_files):
     """Test interactive flow for single file"""
     runner = CliRunner()
 
@@ -33,6 +34,7 @@ def test_cli_interactive_flow_single_file(mock_process, mock_theme, mock_format,
     mock_files.return_value = [Path("test.md")]
     mock_format.return_value = "pdf"
     mock_theme.return_value = "academic"
+    mock_filename.return_value = "output.pdf"
 
     result = runner.invoke(cli)
 
@@ -40,6 +42,7 @@ def test_cli_interactive_flow_single_file(mock_process, mock_theme, mock_format,
     assert mock_files.called
     assert mock_format.called
     assert mock_theme.called
+    assert mock_filename.called
     assert mock_process.called
 
 @patch('md2pdf.prompt_file_selection')
@@ -125,8 +128,9 @@ def test_glob_files_single_file(tmp_path):
 @patch('md2pdf.prompt_file_selection')
 @patch('md2pdf.prompt_output_format')
 @patch('md2pdf.prompt_theme_selection')
+@patch('md2pdf.prompt_filename')
 @patch('md2pdf.process_conversion')
-def test_prompt_file_selection_integration_single_file(mock_process, mock_theme, mock_format, mock_files, tmp_path):
+def test_prompt_file_selection_integration_single_file(mock_process, mock_filename, mock_theme, mock_format, mock_files, tmp_path):
     """Test file selection integration with single file"""
     test_file = tmp_path / "test.md"
     test_file.write_text("# Test")
@@ -135,6 +139,7 @@ def test_prompt_file_selection_integration_single_file(mock_process, mock_theme,
     mock_files.return_value = [test_file]
     mock_format.return_value = 'pdf'
     mock_theme.return_value = 'academic'
+    mock_filename.return_value = 'output.pdf'
 
     # Verify the mock works in CLI context
     runner = CliRunner()
@@ -280,3 +285,62 @@ def test_prompt_theme_selection_invalid_then_valid(monkeypatch):
     # Should return a valid theme
     from theme_manager import list_themes
     assert result in list_themes()
+
+# ===== Task 3: Interactive Filename Prompt Tests =====
+
+def test_prompt_filename_accepts_default(monkeypatch):
+    """Test user accepts default filename"""
+    from md2pdf import prompt_filename
+    from pathlib import Path
+
+    # Mock user input: empty (default)
+    inputs = iter([''])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    input_file = Path("document.md")
+    result = prompt_filename(input_file, "pdf")
+
+    assert result == "document.pdf"
+
+def test_prompt_filename_custom_name(monkeypatch):
+    """Test user provides custom filename"""
+    from md2pdf import prompt_filename
+    from pathlib import Path
+
+    # Mock user input: custom filename
+    inputs = iter(['my-output.pdf'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    input_file = Path("document.md")
+    result = prompt_filename(input_file, "pdf")
+
+    assert result == "my-output.pdf"
+
+def test_prompt_filename_adds_extension(monkeypatch):
+    """Test filename without extension gets extension added"""
+    from md2pdf import prompt_filename
+    from pathlib import Path
+
+    # Mock user input: filename without extension
+    inputs = iter(['my-output'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    input_file = Path("document.md")
+    result = prompt_filename(input_file, "pdf")
+
+    assert result == "my-output.pdf"
+
+def test_prompt_filename_wrong_extension_corrected(monkeypatch):
+    """Test filename with wrong extension gets corrected"""
+    from md2pdf import prompt_filename
+    from pathlib import Path
+
+    # Mock user input: filename with wrong extension
+    inputs = iter(['output.html'])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    input_file = Path("document.md")
+    result = prompt_filename(input_file, "pdf")
+
+    # Should correct extension to pdf
+    assert result == "output.pdf"

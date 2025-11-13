@@ -203,11 +203,38 @@ def prompt_theme_selection(config: dict) -> str:
             click.echo(f"❌ Invalid choice. Please enter a number 1-{len(themes)}.", err=True)
 
 def prompt_filename(input_file: Path, output_format: str) -> str:
-    """Prompt user for output filename (single file only)"""
-    # Placeholder - will be implemented in next task
-    default = f"{input_file.stem}.{output_format}"
-    click.echo(f"Filename prompt (placeholder): {default}")
-    return default
+    """
+    Prompt user for output filename (single file only).
+
+    Args:
+        input_file: Input file path
+        output_format: Output format ('pdf' or 'html')
+
+    Returns:
+        Output filename with correct extension
+    """
+    default_name = f"{input_file.stem}.{output_format}"
+
+    click.echo("\n💾 Output Filename")
+    click.echo(f"Default: {default_name}")
+
+    while True:
+        filename = input(f"Output filename (default: {default_name}): ").strip()
+
+        # Use default if empty
+        if not filename:
+            return default_name
+
+        # Ensure correct extension
+        file_path = Path(filename)
+        expected_ext = f".{output_format}"
+
+        if file_path.suffix.lower() != expected_ext:
+            # Add or replace extension
+            filename = f"{file_path.stem}{expected_ext}"
+            click.echo(f"ℹ️  Corrected filename: {filename}")
+
+        return filename
 
 def process_conversion(
     files: List[Path],
