@@ -7,3 +7,5 @@ output/
 converted/
 .DS_Store
 *.log
+venv/
+.venv/

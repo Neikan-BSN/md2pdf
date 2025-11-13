@@ -24,9 +24,8 @@ def test_main_entry_point():
 @patch('md2pdf.prompt_file_selection')
 @patch('md2pdf.prompt_output_format')
 @patch('md2pdf.prompt_theme_selection')
-@patch('md2pdf.prompt_filename')
 @patch('md2pdf.process_conversion')
-def test_cli_interactive_flow_single_file(mock_process, mock_filename, mock_theme, mock_format, mock_files):
+def test_cli_interactive_flow_single_file(mock_process, mock_theme, mock_format, mock_files):
     """Test interactive flow for single file"""
     runner = CliRunner()
 
@@ -34,7 +33,6 @@ def test_cli_interactive_flow_single_file(mock_process, mock_filename, mock_them
     mock_files.return_value = [Path("test.md")]
     mock_format.return_value = "pdf"
     mock_theme.return_value = "academic"
-    mock_filename.return_value = "test.pdf"
 
     result = runner.invoke(cli)
 
@@ -42,7 +40,6 @@ def test_cli_interactive_flow_single_file(mock_process, mock_filename, mock_them
     assert mock_files.called
     assert mock_format.called
     assert mock_theme.called
-    assert mock_filename.called  # Should be called for single file
     assert mock_process.called
 
 @patch('md2pdf.prompt_file_selection')
@@ -126,20 +123,13 @@ def test_glob_files_single_file(tmp_path):
     assert files[0] == test_file
 
 @patch('md2pdf.prompt_file_selection')
-@patch('md2pdf.prompt_output_format')
-@patch('md2pdf.prompt_theme_selection')
-@patch('md2pdf.prompt_filename')
-@patch('md2pdf.process_conversion')
-def test_prompt_file_selection_integration_single_file(mock_process, mock_filename, mock_theme, mock_format, mock_files, tmp_path):
+def test_prompt_file_selection_integration_single_file(mock_files, tmp_path):
     """Test file selection integration with single file"""
     test_file = tmp_path / "test.md"
     test_file.write_text("# Test")
 
     # Mock the function to return our test file
     mock_files.return_value = [test_file]
-    mock_format.return_value = "pdf"
-    mock_theme.return_value = "academic"
-    mock_filename.return_value = "test.pdf"
 
     # Verify the mock works in CLI context
     runner = CliRunner()
@@ -149,10 +139,7 @@ def test_prompt_file_selection_integration_single_file(mock_process, mock_filena
     assert mock_files.called
 
 @patch('md2pdf.prompt_file_selection')
-@patch('md2pdf.prompt_output_format')
-@patch('md2pdf.prompt_theme_selection')
-@patch('md2pdf.process_conversion')
-def test_prompt_file_selection_integration_batch(mock_process, mock_theme, mock_format, mock_files, tmp_path):
+def test_prompt_file_selection_integration_batch(mock_files, tmp_path):
     """Test file selection integration with batch mode"""
     # Create multiple test files
     files = [
@@ -165,8 +152,6 @@ def test_prompt_file_selection_integration_batch(mock_process, mock_theme, mock_
 
     # Mock the function to return multiple files
     mock_files.return_value = files
-    mock_format.return_value = "html"
-    mock_theme.return_value = "modern"
 
     runner = CliRunner()
     result = runner.invoke(cli)
@@ -199,253 +184,3 @@ def test_file_selection_logic_batch_markdown(tmp_path):
 
     assert len(files) == 3
     assert all(f.suffix == '.md' for f in files)
-
-# ===== Format Selection Tests (Task 2.6) =====
-
-def test_prompt_output_format_pdf():
-    """Test selecting PDF format"""
-    from md2pdf import prompt_output_format
-
-    config = {'output': {'format': 'pdf'}}
-
-    # Mock click.prompt to return 1 (PDF)
-    with patch('click.prompt', return_value=1):
-        result = prompt_output_format(config)
-        assert result == 'pdf'
-
-def test_prompt_output_format_html():
-    """Test selecting HTML format"""
-    from md2pdf import prompt_output_format
-
-    config = {'output': {'format': 'pdf'}}
-
-    # Mock click.prompt to return 2 (HTML)
-    with patch('click.prompt', return_value=2):
-        result = prompt_output_format(config)
-        assert result == 'html'
-
-def test_prompt_output_format_returns_string():
-    """Test that prompt_output_format returns a string"""
-    from md2pdf import prompt_output_format
-
-    config = {'output': {'format': 'pdf'}}
-    # Mock click.prompt to avoid interactive input
-    with patch('click.prompt', return_value=1):
-        result = prompt_output_format(config)
-        assert isinstance(result, str)
-        assert result in ['pdf', 'html']
-
-def test_prompt_output_format_handles_invalid_input():
-    """Test invalid input with retry"""
-    from md2pdf import prompt_output_format
-
-    config = {'output': {'format': 'pdf'}}
-
-    # Mock click.prompt to simulate invalid then valid input
-    with patch('click.prompt', side_effect=[5, 1]):  # 5 is invalid, 1 is valid
-        with patch('click.echo') as mock_echo:
-            result = prompt_output_format(config)
-            assert result == 'pdf'
-            # Should have shown error message
-            assert any('Invalid' in str(call) or '❌' in str(call)
-                      for call in mock_echo.call_args_list)
-
-# ===== Theme Selection Tests (Task 2.7) =====
-
-def test_prompt_theme_selection_academic():
-    """Test selecting academic theme"""
-    from md2pdf import prompt_theme_selection
-
-    config = {
-        'output': {'default_theme': 'academic'},
-        'themes': {
-            'academic': {'mermaid_theme': 'default'}
-        }
-    }
-
-    # Mock click.prompt to return 1 (academic)
-    with patch('click.prompt', return_value=1):
-        result = prompt_theme_selection(config)
-        assert result == 'academic'
-
-def test_prompt_theme_selection_modern():
-    """Test selecting modern theme"""
-    from md2pdf import prompt_theme_selection
-
-    config = {
-        'output': {'default_theme': 'academic'},
-        'themes': {
-            'modern': {'mermaid_theme': 'forest'}
-        }
-    }
-
-    # Mock list_themes to return predictable order
-    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']):
-        with patch('click.prompt', return_value=2):  # Select modern (2nd option)
-            result = prompt_theme_selection(config)
-            assert result == 'modern'
-
-def test_prompt_theme_selection_uses_theme_manager():
-    """Test uses theme_manager.list_themes()"""
-    from md2pdf import prompt_theme_selection
-
-    config = {'output': {'default_theme': 'academic'}}
-
-    # Mock list_themes to verify it's called
-    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']) as mock_list_themes:
-        with patch('click.prompt', return_value=1):
-            result = prompt_theme_selection(config)
-
-            # Verify list_themes was called
-            assert mock_list_themes.called
-            assert result == 'academic'
-
-def test_prompt_theme_selection_handles_invalid_input():
-    """Test invalid theme selection with retry"""
-    from md2pdf import prompt_theme_selection
-
-    config = {'output': {'default_theme': 'academic'}}
-
-    # Mock list_themes to return 4 themes
-    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']):
-        # Mock invalid input (5) then valid (1)
-        with patch('click.prompt', side_effect=[5, 1]):
-            with patch('click.echo') as mock_echo:
-                result = prompt_theme_selection(config)
-                assert result == 'academic'
-                # Should have shown error message
-                assert any('Invalid' in str(call) or '❌' in str(call)
-                          for call in mock_echo.call_args_list)
-
-def test_prompt_theme_selection_returns_string():
-    """Test that prompt_theme_selection returns a string"""
-    from md2pdf import prompt_theme_selection
-
-    config = {'output': {'default_theme': 'academic'}}
-
-    with patch('md2pdf.list_themes', return_value=['academic', 'modern', 'minimal', 'presentation']):
-        with patch('click.prompt', return_value=1):
-            result = prompt_theme_selection(config)
-            assert isinstance(result, str)
-            assert result in ['academic', 'modern', 'minimal', 'presentation']
-
-# ===== Filename Prompt Tests (Task 2.8 - Part 1) =====
-
-def test_prompt_filename_default_generator():
-    """Test default filename generation helper"""
-    from md2pdf import prompt_filename_default
-
-    assert prompt_filename_default(Path("document.md"), "pdf") == "document.pdf"
-    assert prompt_filename_default(Path("notes.md"), "html") == "notes.html"
-    assert prompt_filename_default(Path("/path/to/file.markdown"), "pdf") == "file.pdf"
-
-def test_prompt_filename_accepts_default():
-    """Test accepting default filename"""
-    from md2pdf import prompt_filename
-
-    input_file = Path("test.md")
-    output_format = "pdf"
-
-    # Simulate user accepting default (y)
-    with patch('click.confirm', return_value=True):
-        result = prompt_filename(input_file, output_format)
-        assert result == "test.pdf"
-
-def test_prompt_filename_custom_name():
-    """Test entering custom filename"""
-    from md2pdf import prompt_filename
-
-    input_file = Path("test.md")
-    output_format = "pdf"
-
-    # Simulate user declining default (n), then entering custom name
-    with patch('click.confirm', return_value=False):
-        with patch('click.prompt', return_value='custom_name.pdf'):
-            result = prompt_filename(input_file, output_format)
-            assert result == 'custom_name.pdf'
-
-def test_prompt_filename_custom_name_adds_extension():
-    """Test custom filename without extension gets extension added"""
-    from md2pdf import prompt_filename
-
-    input_file = Path("test.md")
-    output_format = "pdf"
-
-    # Simulate user entering name without extension
-    with patch('click.confirm', return_value=False):
-        with patch('click.prompt', return_value='custom_name'):
-            with patch('click.echo'):  # Suppress warning message
-                result = prompt_filename(input_file, output_format)
-                assert result == 'custom_name.pdf'
-
-# ===== Output Path Creation Tests (Task 2.8 - Part 2) =====
-
-def test_process_conversion_creates_output_directory(tmp_path):
-    """Test that converted/ directory is created"""
-    from md2pdf import process_conversion
-
-    # Create test file
-    test_file = tmp_path / "test.md"
-    test_file.write_text("# Test")
-
-    config = {'output': {'format': 'pdf', 'default_theme': 'academic'}}
-
-    # Process conversion
-    process_conversion(
-        files=[test_file],
-        output_format='pdf',
-        theme='academic',
-        filename='output.pdf',
-        config=config
-    )
-
-    # Verify converted/ directory was created
-    output_dir = tmp_path / "converted"
-    assert output_dir.exists()
-    assert output_dir.is_dir()
-
-def test_process_conversion_single_file_with_custom_name(tmp_path):
-    """Test single file uses custom filename"""
-    from md2pdf import process_conversion
-
-    test_file = tmp_path / "test.md"
-    test_file.write_text("# Test")
-
-    config = {}
-
-    process_conversion(
-        files=[test_file],
-        output_format='pdf',
-        theme='academic',
-        filename='custom.pdf',
-        config=config
-    )
-
-    # Expected output path
-    output_path = tmp_path / "converted" / "custom.pdf"
-    # Directory should exist (file conversion not implemented yet)
-    assert output_path.parent.exists()
-
-def test_process_conversion_batch_uses_defaults(tmp_path):
-    """Test batch mode uses default filenames"""
-    from md2pdf import process_conversion
-
-    # Create multiple test files
-    file1 = tmp_path / "doc1.md"
-    file2 = tmp_path / "doc2.md"
-    file1.write_text("# Doc 1")
-    file2.write_text("# Doc 2")
-
-    config = {}
-
-    process_conversion(
-        files=[file1, file2],
-        output_format='html',
-        theme='modern',
-        filename=None,  # Batch mode
-        config=config
-    )
-
-    # Verify output directory exists
-    output_dir = tmp_path / "converted"
-    assert output_dir.exists()

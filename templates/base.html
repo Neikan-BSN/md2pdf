@@ -16,26 +16,26 @@
             integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05"
             crossorigin="anonymous"></script>
 
-    <!-- Mermaid for diagrams -->
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: '{{ mermaid_theme }}'
-        });
-    </script>
+    <!-- Mermaid for diagrams (UMD version with SRI) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"
+            integrity="sha384-3z9C6ovVdA91upDhB0eKMWeRfSHnAJ+F2vh7VNvVRWTF9pDxLfiylmHvr3hl7Qpv"
+            crossorigin="anonymous"></script>
 
     <!-- Highlight.js for code syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+          integrity="sha512-i1zzT9xOKs/jZyfXqEflqylIKzPAcoiHq/D2BPC19A/VfiwUoG81IKkSEpL29QBE/matQr5UPvA/aAae1atagA=="
+          crossorigin="anonymous">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
+            integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbZ7f2CJ3/Sbs3RzzdvdwhnNfrb8ae5OKrAnLKOx5rFrScv3vHq+YlA1E4cdExTw=="
+            crossorigin="anonymous"></script>
 
     <!-- Selected theme CSS -->
     <style>{{ theme_css }}</style>
 
     <script>
-        // Auto-render math after page load
+        // Initialize after DOM is loaded
         document.addEventListener("DOMContentLoaded", function() {
+            // Auto-render math equations
             renderMathInElement(document.body, {
                 delimiters: [
                     {left: '$$', right: '$$', display: true},
@@ -45,6 +45,15 @@
                 ],
                 throwOnError: false
             });
+
+            // Initialize Mermaid diagrams
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: '{{ mermaid_theme }}'
+            });
+
+            // Highlight code blocks
+            hljs.highlightAll();
         });
     </script>
 </head>
