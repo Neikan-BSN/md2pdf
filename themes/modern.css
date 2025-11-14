@@ -47,8 +47,10 @@
     border-radius: 6px;
     overflow-x: auto;
     font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-    font-size: 14px;
+    font-size: 12px;
     border: 1px solid #e1e4e8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .markdown-body code {
@@ -57,6 +59,37 @@
     padding: 3px 6px;
     border-radius: 3px;
     font-size: 85%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-body pre code {
+    background: transparent;
+    padding: 0;
+}
+
+.markdown-body a {
+    color: #0366d6;
+    text-decoration: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-body a:hover {
+    text-decoration: underline;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #0366d6;
+    padding-left: 16px;
+    margin: 16px 0;
+    color: #586069;
+}
+
+.markdown-body s,
+.markdown-body del {
+    text-decoration: line-through;
+    opacity: 0.65;
 }
 
 .markdown-body .mermaid {

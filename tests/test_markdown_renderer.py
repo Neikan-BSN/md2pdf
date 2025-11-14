@@ -64,3 +64,35 @@ def test_render_markdown_with_tables():
     assert '<th>Column 2</th>' in html
     assert '<td>Value A</td>' in html
     assert '<td>Value B</td>' in html
+
+
+def test_render_markdown_with_strikethrough():
+    """Test rendering strikethrough text (GFM extension)"""
+    md = "This is ~~crossed out~~ text"
+    html = render_markdown(md)
+
+    assert '<s>crossed out</s>' in html
+    assert 'This is' in html
+
+
+def test_render_markdown_with_blockquotes():
+    """Test rendering blockquotes"""
+    md = "> This is a quote\n> Second line"
+    html = render_markdown(md)
+
+    assert '<blockquote>' in html
+    assert 'This is a quote' in html
+    assert 'Second line' in html
+
+
+def test_render_markdown_with_long_code():
+    """Test rendering code blocks with long lines"""
+    md = """```python
+def very_long_function_name(param1, param2, param3):
+    return "very long string that exceeds normal line width"
+```"""
+    html = render_markdown(md)
+
+    assert '<pre>' in html
+    assert '<code' in html
+    assert 'very_long_function_name' in html
