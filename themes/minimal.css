@@ -58,11 +58,17 @@
     border-collapse: collapse;
     width: 100%;
     margin: 14px 0;
+    table-layout: auto;
+    font-size: 14px;
 }
 
 .markdown-body th, .markdown-body td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 6px 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 200px;
 }
 
 .markdown-body th {

@@ -69,12 +69,18 @@
     border-collapse: collapse;
     width: 100%;
     margin: 20px 0;
+    table-layout: auto;
+    font-size: 18px;
 }
 
 .markdown-body th, .markdown-body td {
     border: 1px solid #444;
-    padding: 16px;
+    padding: 10px 16px;
     text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 250px;
 }
 
 .markdown-body th {
