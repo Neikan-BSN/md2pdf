@@ -9,7 +9,8 @@ from markdown_it import MarkdownIt
 import re
 
 # Module-level MarkdownIt instance for better performance
-_markdown_parser = MarkdownIt()
+# Enable table plugin for GitHub Flavored Markdown table support
+_markdown_parser = MarkdownIt('commonmark').enable('table')
 
 
 def render_markdown(md_content: str) -> str:

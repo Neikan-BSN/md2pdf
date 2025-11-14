@@ -46,3 +46,21 @@ def test_extract_title_default():
     title = extract_title(md)
 
     assert title == "Untitled Document"
+
+
+def test_render_markdown_with_tables():
+    """Test rendering markdown tables (GFM extension)"""
+    md = """| Column 1 | Column 2 |
+|----------|----------|
+| Value A  | Value B  |
+| Value C  | Value D  |"""
+
+    html = render_markdown(md)
+
+    assert '<table>' in html
+    assert '<thead>' in html
+    assert '<tbody>' in html
+    assert '<th>Column 1</th>' in html
+    assert '<th>Column 2</th>' in html
+    assert '<td>Value A</td>' in html
+    assert '<td>Value B</td>' in html
