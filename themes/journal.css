@@ -1,0 +1,216 @@
+/* Journal Theme - Academic medical journal article styling */
+
+.markdown-body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 10pt;
+    line-height: 1.5;
+    max-width: 7.5in;
+    margin: 0 auto;
+    padding: 0.75in 0.5in;
+    color: #1a1a1a;
+    background: #fff;
+}
+
+.markdown-body h1 {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 8pt;
+    text-align: center;
+    color: #000;
+    page-break-after: avoid;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+}
+
+.markdown-body h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 16pt;
+    margin-bottom: 8pt;
+    color: #000;
+    page-break-after: avoid;
+    text-transform: uppercase;
+}
+
+.markdown-body h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-top: 12pt;
+    margin-bottom: 6pt;
+    color: #000;
+    font-style: italic;
+}
+
+.markdown-body p {
+    margin-bottom: 8pt;
+    text-align: justify;
+    text-indent: 0;
+}
+
+/* First paragraph after heading has no indent */
+.markdown-body h1 + p,
+.markdown-body h2 + p,
+.markdown-body h3 + p {
+    text-indent: 0;
+}
+
+.markdown-body pre {
+    background: #fafafa;
+    padding: 12px;
+    border: 1px solid #ddd;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 8pt;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 10pt 0;
+}
+
+.markdown-body code {
+    font-family: 'Courier New', monospace;
+    background: #f5f5f5;
+    padding: 1px 3px;
+    font-size: 90%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-body pre code {
+    background: transparent;
+    padding: 0;
+}
+
+.markdown-body a {
+    color: #000;
+    text-decoration: none;
+    border-bottom: 1px solid #999;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-body a:hover {
+    border-bottom-color: #000;
+}
+
+.markdown-body blockquote {
+    border-left: none;
+    background: #f9f9f9;
+    padding: 8pt 12pt;
+    margin: 10pt 20pt;
+    font-size: 9pt;
+    font-style: italic;
+    border: 1px solid #e0e0e0;
+}
+
+.markdown-body s,
+.markdown-body del {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.markdown-body strong {
+    font-weight: bold;
+}
+
+.markdown-body em {
+    font-style: italic;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin: 8pt 0;
+    padding-left: 20pt;
+}
+
+.markdown-body li {
+    margin-bottom: 3pt;
+}
+
+.markdown-body .mermaid {
+    text-align: center;
+    margin: 12pt 0;
+    padding: 12pt;
+    background: #fafafa;
+    border: 1px solid #ddd;
+}
+
+/* Journal-style table formatting */
+.markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12pt 0;
+    table-layout: auto;
+    font-size: 9pt;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+}
+
+.markdown-body thead {
+    border-bottom: 1px solid #000;
+}
+
+.markdown-body th {
+    font-weight: bold;
+    padding: 6px 8px;
+    text-align: left;
+    background: transparent;
+    border: none;
+}
+
+.markdown-body td {
+    padding: 6px 8px;
+    text-align: left;
+    border: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 200px;
+}
+
+.markdown-body tbody tr {
+    border-top: 1px solid #ddd;
+}
+
+/* Table caption styling */
+.markdown-body table + p {
+    font-size: 9pt;
+    font-style: italic;
+    margin-top: 4pt;
+    text-align: left;
+}
+
+/* Figure/image styling */
+.markdown-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 12pt auto;
+}
+
+/* Abstract section (if using blockquote) */
+.markdown-body blockquote.abstract {
+    background: #fff;
+    border: 1px solid #000;
+    padding: 10pt;
+    margin: 12pt 0;
+    font-style: normal;
+    font-size: 9pt;
+}
+
+@media print {
+    .page-break {
+        page-break-after: always;
+    }
+
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+        page-break-after: avoid;
+    }
+
+    .markdown-body table, .markdown-body figure {
+        page-break-inside: avoid;
+    }
+
+    .markdown-body {
+        font-size: 10pt;
+    }
+}

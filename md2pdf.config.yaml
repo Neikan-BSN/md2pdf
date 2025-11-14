@@ -4,7 +4,7 @@ output:
   # Default output format: pdf or html
   format: pdf
 
-  # Default theme: academic, modern, minimal, presentation
+  # Default theme: academic, clinical, journal, minimal, modern, presentation
   default_theme: academic
 
 pdf_options:
@@ -41,9 +41,13 @@ rendering:
 themes:
   academic:
     mermaid_theme: default
-  modern:
-    mermaid_theme: forest
+  clinical:
+    mermaid_theme: default
+  journal:
+    mermaid_theme: neutral
   minimal:
     mermaid_theme: neutral
+  modern:
+    mermaid_theme: forest
   presentation:
     mermaid_theme: dark

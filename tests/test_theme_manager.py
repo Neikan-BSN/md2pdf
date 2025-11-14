@@ -6,10 +6,12 @@ def test_list_themes():
     """Test listing available themes"""
     themes = list_themes()
     assert 'academic' in themes
-    assert 'modern' in themes
+    assert 'clinical' in themes
+    assert 'journal' in themes
     assert 'minimal' in themes
+    assert 'modern' in themes
     assert 'presentation' in themes
-    assert len(themes) == 4
+    assert len(themes) == 6
 
 def test_load_theme_css():
     """Test loading theme CSS"""

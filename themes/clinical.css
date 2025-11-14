@@ -1,0 +1,207 @@
+/* Clinical Theme - Professional medical/clinical documentation styling */
+
+.markdown-body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    max-width: 7in;
+    margin: 0 auto;
+    padding: 0.75in;
+    color: #2c3e50;
+    background: #fff;
+}
+
+.markdown-body h1 {
+    font-size: 18pt;
+    font-weight: 600;
+    margin-top: 24pt;
+    margin-bottom: 12pt;
+    color: #2c5f7c;
+    border-bottom: 3px solid #2c5f7c;
+    padding-bottom: 8pt;
+    page-break-after: avoid;
+}
+
+.markdown-body h2 {
+    font-size: 14pt;
+    font-weight: 600;
+    margin-top: 18pt;
+    margin-bottom: 10pt;
+    color: #34495e;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 4pt;
+    page-break-after: avoid;
+}
+
+.markdown-body h3 {
+    font-size: 12pt;
+    font-weight: 600;
+    margin-top: 14pt;
+    margin-bottom: 8pt;
+    color: #34495e;
+}
+
+.markdown-body p {
+    margin-bottom: 10pt;
+    text-align: left;
+}
+
+.markdown-body pre {
+    background: #f8f9fa;
+    padding: 14px;
+    border-radius: 4px;
+    border-left: 4px solid #2c5f7c;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 9pt;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 12pt 0;
+}
+
+.markdown-body code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #f0f2f5;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 95%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    color: #c7254e;
+}
+
+.markdown-body pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.markdown-body a {
+    color: #2c5f7c;
+    text-decoration: underline;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.markdown-body a:hover {
+    color: #1a3d52;
+}
+
+.markdown-body blockquote {
+    border-left: 5px solid #3498db;
+    background: #f0f8ff;
+    padding: 10pt 16pt;
+    margin: 12pt 0;
+    color: #2c3e50;
+    font-style: normal;
+    border-radius: 3px;
+}
+
+.markdown-body blockquote p {
+    margin-bottom: 6pt;
+}
+
+.markdown-body blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.markdown-body s,
+.markdown-body del {
+    text-decoration: line-through;
+    opacity: 0.6;
+    color: #95a5a6;
+}
+
+.markdown-body strong {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.markdown-body em {
+    font-style: italic;
+    color: #34495e;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin: 8pt 0;
+    padding-left: 24pt;
+}
+
+.markdown-body li {
+    margin-bottom: 4pt;
+}
+
+.markdown-body .mermaid {
+    text-align: center;
+    margin: 16pt 0;
+    padding: 16pt;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.markdown-body table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12pt 0;
+    table-layout: auto;
+    font-size: 10pt;
+    border: 2px solid #2c5f7c;
+}
+
+.markdown-body th {
+    background: #2c5f7c;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 8px 10px;
+    text-align: left;
+    border: 1px solid #1a3d52;
+}
+
+.markdown-body td {
+    border: 1px solid #cbd5e0;
+    padding: 7px 10px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 200px;
+}
+
+.markdown-body tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.markdown-body tr:hover {
+    background: #e8f4f8;
+}
+
+/* Medical alert boxes (using blockquote with specific styling) */
+.markdown-body blockquote.warning {
+    border-left-color: #e74c3c;
+    background: #fff5f5;
+}
+
+.markdown-body blockquote.info {
+    border-left-color: #3498db;
+    background: #f0f8ff;
+}
+
+.markdown-body blockquote.success {
+    border-left-color: #27ae60;
+    background: #f0fff4;
+}
+
+@media print {
+    .page-break {
+        page-break-after: always;
+    }
+
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+        page-break-after: avoid;
+    }
+
+    .markdown-body table {
+        page-break-inside: avoid;
+    }
+}
