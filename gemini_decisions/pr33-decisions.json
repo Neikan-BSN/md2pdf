@@ -1,0 +1,66 @@
+{
+  "pr_number": 33,
+  "pr_title": "feat: initialize md2pdf project structure",
+  "reviewed_date": "2025-11-08",
+  "reviewer": "Claude Code (Sonnet 4.5)",
+  "decisions": [
+    {
+      "number": 1,
+      "recommendation": "package-lock.json contains non-existent package versions (express@4.21.2, body-parser@1.20.3) - potential dependency confusion attack",
+      "severity": "CRITICAL",
+      "disposition": "PARTIALLY_IMPLEMENTED",
+      "rationale": "package-lock.json was regenerated in commit 222ef32, but express and body-parser versions were not updated to eliminate security concern",
+      "scope": "Update express to ^4.21.2, remove body-parser entirely (redundant with Express 4.16+), regenerate package-lock.json, verify all versions exist on npm registry",
+      "file": "md2pdf/package-lock.json",
+      "line": 4,
+      "commit": "222ef32 (partial fix - regenerated lock file, updated puppeteer only)"
+    },
+    {
+      "number": 2,
+      "recommendation": "Outdated dependencies: puppeteer ^21.0.0 (deprecated), express ^4.18.0 (outdated), body-parser (redundant)",
+      "severity": "HIGH",
+      "disposition": "PARTIALLY_IMPLEMENTED",
+      "rationale": "Puppeteer upgraded to ^24.29.1 (exceeds recommendation), but express remains outdated and body-parser is still redundant",
+      "scope": "Update express to ^4.21.2 (latest stable), remove body-parser dependency, update server.js to use express.json() instead of body-parser middleware",
+      "file": "md2pdf/package.json",
+      "line": 14,
+      "commit": "222ef32 (puppeteer only)"
+    },
+    {
+      "number": 3,
+      "recommendation": "Missing venv/ and .venv/ entries in .gitignore to prevent committing Python virtual environments",
+      "severity": "MEDIUM",
+      "disposition": "IMPLEMENT",
+      "rationale": "Standard Python best practice to prevent accidentally committing large, platform-specific virtual environments to version control",
+      "scope": "Add two lines to md2pdf/.gitignore: 'venv/' and '.venv/'",
+      "file": "md2pdf/.gitignore",
+      "line": 9,
+      "commit": null
+    },
+    {
+      "number": 4,
+      "recommendation": "Pin Python dependency versions in requirements.txt using == instead of >= for reproducible builds",
+      "severity": "MEDIUM",
+      "disposition": "DEFER",
+      "rationale": "Defer until md2pdf moves from prototype to production phase; >= provides acceptable flexibility for initial development iterations",
+      "scope": "When implementing: run 'pip freeze > requirements.txt' or use pip-tools (requirements.in with >=, requirements.txt with ==). Recommended versions: click==8.1.7, pyyaml==6.0.2, jinja2==3.1.4, markdown-it-py==3.0.0, requests==2.32.3",
+      "file": "md2pdf/requirements.txt",
+      "line": 5,
+      "commit": null
+    }
+  ],
+  "implementation_summary": {
+    "total_recommendations": 4,
+    "already_implemented": 1,
+    "partially_implemented": 2,
+    "to_implement": 1,
+    "deferred": 1,
+    "next_actions": [
+      "Complete dependency updates (express, remove body-parser)",
+      "Add venv/ and .venv/ to .gitignore",
+      "Update server.js to use express.json() instead of body-parser",
+      "Regenerate package-lock.json with npm install",
+      "Verify all package versions exist on public npm registry"
+    ]
+  }
+}

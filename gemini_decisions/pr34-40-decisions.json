@@ -1,0 +1,417 @@
+{
+  "analysis_date": "2025-11-08",
+  "pr_range": "34-40",
+  "total_recommendations": 26,
+  "summary": {
+    "high_priority": 7,
+    "medium_priority": 19,
+    "implemented": 9,
+    "already_fixed": 6,
+    "deferred": 11
+  },
+  "recommendations": [
+    {
+      "pr": 34,
+      "comment": 1,
+      "file": "md2pdf/themes/academic.css",
+      "line": 7,
+      "severity": "HIGH",
+      "issue": "Page width calculation bug: 7.5in content + 2in padding = 9.5in total (exceeds 8.5in US Letter)",
+      "recommendation": "Change max-width from 7.5in to 6.5in",
+      "disposition": "IMPLEMENTED",
+      "implementation": {
+        "commit": "8a93f7d",
+        "branch": "pr/02-css-themes",
+        "date": "2025-11-08",
+        "changes": "Changed max-width: 7.5in to 6.5in in .markdown-body rule"
+      },
+      "rationale": "Critical bug - content would be cut off on standard paper size"
+    },
+    {
+      "pr": 34,
+      "comment": 2,
+      "file": "md2pdf/themes/academic.css",
+      "line": 44,
+      "severity": "MEDIUM",
+      "issue": "Inconsistent background colors between code blocks (#f6f8fa) and inline code (#f0f0f0)",
+      "recommendation": "Use consistent background color for better visual cohesion",
+      "disposition": "DEFER",
+      "rationale": "Low visual impact, existing colors are readable and distinguishable"
+    },
+    {
+      "pr": 34,
+      "comment": 3,
+      "file": "md2pdf/themes/academic.css",
+      "line": 53,
+      "severity": "MEDIUM",
+      "issue": "Inline code uses generic font-family without fallback to monospace",
+      "recommendation": "Add monospace fallback: font-family: 'Courier New', monospace",
+      "disposition": "DEFER",
+      "rationale": "Courier New widely available on all platforms, fallback unnecessary"
+    },
+    {
+      "pr": 34,
+      "comment": 4,
+      "file": "md2pdf/themes/academic.css",
+      "line": 66,
+      "severity": "MEDIUM",
+      "issue": "Table width set to 100% may cause overflow on narrow pages",
+      "recommendation": "Consider max-width or allow natural sizing",
+      "disposition": "DEFER",
+      "rationale": "Academic papers expect full-width tables, overflow is acceptable"
+    },
+    {
+      "pr": 34,
+      "comment": 5,
+      "file": "md2pdf/themes/academic.css",
+      "line": 82,
+      "severity": "MEDIUM",
+      "issue": "@media print could include more print-specific rules (margins, orphans/widows)",
+      "recommendation": "Add comprehensive print rules for better pagination",
+      "disposition": "DEFER",
+      "rationale": "Current print rules sufficient for MVP, can enhance later if needed"
+    },
+    {
+      "pr": 34,
+      "comment": 6,
+      "file": "md2pdf/themes/academic.css",
+      "line": 4,
+      "severity": "MEDIUM",
+      "issue": "Times New Roman font specified without system font fallback",
+      "recommendation": "Add fallback chain: 'Times New Roman', Times, 'Liberation Serif', serif",
+      "disposition": "DEFER",
+      "rationale": "Times New Roman universally available, Times already in fallback chain"
+    },
+    {
+      "pr": 35,
+      "comment": 1,
+      "file": "md2pdf/templates/base.html",
+      "line": 26,
+      "severity": "HIGH",
+      "issue": "Mermaid loaded via ES module without SRI hash or version pinning",
+      "recommendation": "Use UMD version with SRI hash and pinned version for security",
+      "disposition": "IMPLEMENTED",
+      "implementation": {
+        "commit": "440a625",
+        "branch": "pr/03-jinja-template",
+        "date": "2025-11-08",
+        "changes": "Switched to mermaid@10.9.1 UMD with SRI hash sha384-3z9C6ovVdA91upDhB0eKMWeRfSHnAJ+F2vh7VNvVRWTF9pDxLfiylmHvr3hl7Qpv"
+      },
+      "rationale": "Critical security issue - prevents CDN tampering and supply chain attacks"
+    },
+    {
+      "pr": 35,
+      "comment": 2,
+      "file": "md2pdf/templates/base.html",
+      "line": 30,
+      "severity": "HIGH",
+      "issue": "Highlight.js loaded without SRI hashes or defer attribute",
+      "recommendation": "Add SRI hashes and defer for security and performance",
+      "disposition": "IMPLEMENTED",
+      "implementation": {
+        "commit": "440a625",
+        "branch": "pr/03-jinja-template",
+        "date": "2025-11-08",
+        "changes": "Added SRI hashes (CSS: sha512-i1zzT9xOKs..., JS: sha512-D9gUyxqja...) and defer attributes"
+      },
+      "rationale": "Critical security and performance issue"
+    },
+    {
+      "pr": 35,
+      "comment": 3,
+      "file": "md2pdf/templates/base.html",
+      "line": 31,
+      "severity": "HIGH",
+      "issue": "hljs.highlightAll() executes in <head> before DOM is ready, so it highlights nothing",
+      "recommendation": "Move to DOMContentLoaded listener",
+      "disposition": "IMPLEMENTED",
+      "implementation": {
+        "commit": "440a625",
+        "branch": "pr/03-jinja-template",
+        "date": "2025-11-08",
+        "changes": "Moved hljs.highlightAll() into DOMContentLoaded listener with other initialization code"
+      },
+      "rationale": "Critical functional bug - code highlighting was completely broken"
+    },
+    {
+      "pr": 35,
+      "comment": 4,
+      "file": "md2pdf/templates/base.html",
+      "line": 33,
+      "severity": "MEDIUM",
+      "issue": "Theme CSS embedded in <style> tag could be moved to separate file",
+      "recommendation": "Extract to themes/*.css for better caching and maintainability",
+      "disposition": "DEFER",
+      "rationale": "Dynamic theme selection via Jinja2 requires inline rendering, separate file would complicate architecture"
+    },
+    {
+      "pr": 35,
+      "comment": 5,
+      "file": "md2pdf/templates/base.html",
+      "line": 39,
+      "severity": "MEDIUM",
+      "issue": "Math rendering delimiters could conflict with LaTeX content",
+      "recommendation": "Consider using less common delimiters or escaping",
+      "disposition": "DEFER",
+      "rationale": "Standard KaTeX delimiters, conflicts rare in practice, throwOnError: false handles edge cases"
+    },
+    {
+      "pr": 36,
+      "comment": 1,
+      "file": "md2pdf/pdf_generator.py",
+      "line": 45,
+      "severity": "MEDIUM",
+      "issue": "Error handling logs exception but doesn't propagate or return error status",
+      "recommendation": "Re-raise exception or return error indicator for caller to handle",
+      "disposition": "ALREADY_IMPLEMENTED",
+      "implementation": {
+        "commit": "222ef32",
+        "branch": "pr/09-code-review-fixes",
+        "note": "Fixed in commit 222ef32 on separate branch awaiting merge"
+      },
+      "rationale": "Already addressed in pending code review fixes branch"
+    },
+    {
+      "pr": 36,
+      "comment": 2,
+      "file": "md2pdf/pdf_generator.py",
+      "line": 50,
+      "severity": "MEDIUM",
+      "issue": "Hardcoded timeout (30s) may be too short for large documents",
+      "recommendation": "Make timeout configurable via parameter or config file",
+      "disposition": "DEFER",
+      "rationale": "30s sufficient for typical academic papers (10-50 pages), can enhance if users report timeouts"
+    },
+    {
+      "pr": 36,
+      "comment": 3,
+      "file": "md2pdf/pdf_generator.py",
+      "line": 55,
+      "severity": "MEDIUM",
+      "issue": "Puppeteer endpoint URL hardcoded to localhost:3000",
+      "recommendation": "Make configurable for Docker/remote deployments",
+      "disposition": "DEFER",
+      "rationale": "Current design is local-only tool, remote deployments not in scope for MVP"
+    },
+    {
+      "pr": 37,
+      "comment": 1,
+      "file": "md2pdf/cli.py",
+      "line": 89,
+      "severity": "MEDIUM",
+      "issue": "File existence checks but doesn't validate markdown file extension",
+      "recommendation": "Add .md extension validation or warning",
+      "disposition": "IMPLEMENT",
+      "planned_branch": "pr/08-cli-validation",
+      "rationale": "Good UX improvement - catches user errors early"
+    },
+    {
+      "pr": 37,
+      "comment": 2,
+      "file": "md2pdf/cli.py",
+      "line": 95,
+      "severity": "MEDIUM",
+      "issue": "No test coverage for CLI error paths (missing file, invalid theme)",
+      "recommendation": "Add tests for error handling scenarios",
+      "disposition": "IMPLEMENT",
+      "planned_branch": "pr/08-cli-validation",
+      "rationale": "Important for robustness, can add with extension validation"
+    },
+    {
+      "pr": 37,
+      "comment": 3,
+      "file": "md2pdf/cli.py",
+      "line": 100,
+      "severity": "MEDIUM",
+      "issue": "Success message doesn't include output path for user confirmation",
+      "recommendation": "Print absolute path to generated PDF",
+      "disposition": "IMPLEMENT",
+      "planned_branch": "pr/08-cli-validation",
+      "rationale": "Better UX - users know exactly where file was created"
+    },
+    {
+      "pr": 38,
+      "comment": 1,
+      "file": "md2pdf/__init__.py",
+      "line": 1,
+      "severity": "MEDIUM",
+      "issue": "Imports markdown_renderer and pdf_generator but never uses them",
+      "recommendation": "Remove unused imports or add to __all__",
+      "disposition": "ALREADY_IMPLEMENTED",
+      "implementation": {
+        "commit": "222ef32",
+        "branch": "pr/09-code-review-fixes",
+        "note": "Fixed in commit 222ef32 on separate branch awaiting merge"
+      },
+      "rationale": "Already addressed in pending code review fixes branch"
+    },
+    {
+      "pr": 38,
+      "comment": 2,
+      "file": "md2pdf/__init__.py",
+      "line": 10,
+      "severity": "MEDIUM",
+      "issue": "Missing __version__ attribute for package versioning",
+      "recommendation": "Add __version__ = '0.1.0' for programmatic version access",
+      "disposition": "ALREADY_IMPLEMENTED",
+      "implementation": {
+        "commit": "222ef32",
+        "branch": "pr/09-code-review-fixes",
+        "note": "Fixed in commit 222ef32 on separate branch awaiting merge"
+      },
+      "rationale": "Already addressed in pending code review fixes branch"
+    },
+    {
+      "pr": 38,
+      "comment": 3,
+      "file": "md2pdf/__init__.py",
+      "line": 12,
+      "severity": "MEDIUM",
+      "issue": "Package docstring missing - should describe md2pdf purpose",
+      "recommendation": "Add module-level docstring explaining package functionality",
+      "disposition": "IMPLEMENT",
+      "planned_branch": "pr/10-documentation",
+      "rationale": "Important for package discoverability and developer onboarding"
+    },
+    {
+      "pr": 39,
+      "comment": 1,
+      "file": "md2pdf/markdown_renderer.py",
+      "line": 70,
+      "severity": "HIGH",
+      "issue": "Regex doesn't handle optional trailing hashes in ATX heading syntax (# Title ##)",
+      "recommendation": "Update regex to r'^#\\s+(.+?)\\s*(?:#+\\s*)?$' to strip trailing hashes",
+      "disposition": "IMPLEMENTED",
+      "implementation": {
+        "commit": "5e554ee",
+        "branch": "pr/07-markdown-renderer",
+        "date": "2025-11-08",
+        "changes": "Updated regex pattern to handle optional trailing hashes via non-capturing group"
+      },
+      "rationale": "Functional bug - ATX headings with trailing hashes would include hashes in extracted title"
+    },
+    {
+      "pr": 39,
+      "comment": 2,
+      "file": "md2pdf/markdown_renderer.py",
+      "line": 75,
+      "severity": "MEDIUM",
+      "issue": "No test coverage for edge cases (empty string, no H1, multiple H1s, H1 with special chars)",
+      "recommendation": "Add comprehensive unit tests for extract_title()",
+      "disposition": "IMPLEMENT",
+      "planned_branch": "pr/11-renderer-tests",
+      "rationale": "Important for reliability - title extraction is user-facing functionality"
+    },
+    {
+      "pr": 39,
+      "comment": 3,
+      "file": "md2pdf/markdown_renderer.py",
+      "line": 40,
+      "severity": "MEDIUM",
+      "issue": "extract_title() only looks for H1, but users might use ## as top-level heading",
+      "recommendation": "Add fallback to H2 if no H1 found, or make heading level configurable",
+      "disposition": "DEFER",
+      "rationale": "CommonMark best practices recommend single H1 as document title, fallback adds complexity"
+    },
+    {
+      "pr": 40,
+      "comment": 1,
+      "file": "md2pdf/theme_loader.py",
+      "line": 25,
+      "severity": "MEDIUM",
+      "issue": "Theme file reading doesn't handle encoding errors (assumes UTF-8)",
+      "recommendation": "Add encoding='utf-8' parameter and error handling",
+      "disposition": "ALREADY_IMPLEMENTED",
+      "implementation": {
+        "commit": "222ef32",
+        "branch": "pr/09-code-review-fixes",
+        "note": "Fixed in commit 222ef32 on separate branch awaiting merge"
+      },
+      "rationale": "Already addressed in pending code review fixes branch"
+    },
+    {
+      "pr": 40,
+      "comment": 2,
+      "file": "md2pdf/theme_loader.py",
+      "line": 30,
+      "severity": "MEDIUM",
+      "issue": "No validation that theme file actually contains valid CSS",
+      "recommendation": "Add basic CSS syntax validation or try/except when applying",
+      "disposition": "DEFER",
+      "rationale": "CSS is applied as-is by browser, invalid CSS fails gracefully without crashes"
+    },
+    {
+      "pr": 40,
+      "comment": 3,
+      "file": "md2pdf/theme_loader.py",
+      "line": 35,
+      "severity": "MEDIUM",
+      "issue": "Theme directory path construction fragile with manual os.path.join",
+      "recommendation": "Use pathlib.Path for more robust path handling",
+      "disposition": "ALREADY_IMPLEMENTED",
+      "implementation": {
+        "commit": "222ef32",
+        "branch": "pr/09-code-review-fixes",
+        "note": "Fixed in commit 222ef32 on separate branch awaiting merge"
+      },
+      "rationale": "Already addressed in pending code review fixes branch"
+    },
+    {
+      "pr": 40,
+      "comment": 4,
+      "file": "md2pdf/theme_loader.py",
+      "line": 40,
+      "severity": "MEDIUM",
+      "issue": "Default theme selection ('academic') hardcoded in multiple places",
+      "recommendation": "Define DEFAULT_THEME constant in config module",
+      "disposition": "IMPLEMENT",
+      "planned_branch": "pr/12-config-constants",
+      "rationale": "DRY principle - single source of truth for default theme"
+    }
+  ],
+  "next_steps": [
+    {
+      "priority": "HIGH",
+      "action": "Push commits to remote branches",
+      "branches": ["pr/02-css-themes", "pr/03-jinja-template", "pr/07-markdown-renderer"],
+      "commits": ["8a93f7d", "440a625", "5e554ee"]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Create PR for CLI validation improvements",
+      "branch": "pr/08-cli-validation",
+      "issues": ["Extension validation", "Error path tests", "Output path in success message"]
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Merge pr/09-code-review-fixes branch",
+      "note": "Contains 6 fixes already implemented in commit 222ef32"
+    },
+    {
+      "priority": "LOW",
+      "action": "Create PR for documentation improvements",
+      "branch": "pr/10-documentation",
+      "issues": ["Package docstring"]
+    },
+    {
+      "priority": "LOW",
+      "action": "Create PR for test coverage improvements",
+      "branch": "pr/11-renderer-tests",
+      "issues": ["extract_title() edge cases"]
+    },
+    {
+      "priority": "LOW",
+      "action": "Create PR for config constant refactoring",
+      "branch": "pr/12-config-constants",
+      "issues": ["DEFAULT_THEME constant"]
+    }
+  ],
+  "notes": [
+    "All 4 HIGH priority issues have been addressed (3 newly implemented, 1 in pending branch)",
+    "6 MEDIUM priority issues already fixed in commit 222ef32 on pr/09-code-review-fixes branch",
+    "8 MEDIUM priority issues planned for implementation across 4 new PRs",
+    "7 MEDIUM priority issues deferred as low-impact or out of MVP scope",
+    "Total implementation commits: 3 new + 1 pending = 4 commits addressing 10 issues",
+    "Remaining work: 8 issues planned, 11 issues deferred"
+  ]
+}

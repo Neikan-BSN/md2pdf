@@ -1,0 +1,39 @@
+{
+  "pr_number": 36,
+  "pr_title": "feat: add YAML configuration file with default settings",
+  "pr_branch": "pr/05a-config-validation-improvements",
+  "gemini_review_date": "2025-11-08T05:41:17Z",
+  "summary": "PR #36 introduces YAML configuration for md2pdf tool. Gemini identified one medium-priority issue: redundant mermaid_theme configuration for the academic theme that duplicates the global default.",
+  "decisions": [
+    {
+      "number": 1,
+      "file": "md2pdf/md2pdf.config.yaml",
+      "line": 43,
+      "severity": "MEDIUM",
+      "recommendation": "Remove redundant theme-specific Mermaid configuration for academic theme",
+      "gemini_comment": "The `mermaid_theme` for the `academic` theme is set to `default`, which is the same as the global `rendering.mermaid_theme` defined on line 32. This is redundant. To improve maintainability and avoid potential inconsistencies if the global default is changed in the future, it's better to remove this theme-specific override.",
+      "disposition": "IMPLEMENT",
+      "rationale": "Removes redundant configuration that duplicates the global default, improving maintainability and preventing future inconsistencies.",
+      "scope": "Remove line 43 (mermaid_theme: default) from the academic theme configuration block, since it matches the global default on line 32.",
+      "implementation_status": "COMPLETED",
+      "changes_made": [
+        "Removed 'mermaid_theme: default' from academic theme entry",
+        "Kept theme-specific overrides for modern (forest), minimal (neutral), and presentation (dark) themes",
+        "Academic theme now inherits global mermaid_theme default value"
+      ],
+      "rationale_details": "The DRY principle suggests configuration values should not be duplicated. If someone updates the global default in the future, they may inadvertently miss updating theme-specific overrides, causing inconsistencies. By removing the redundant entry, the application will naturally fall back to the global default, ensuring consistency."
+    }
+  ],
+  "implementation_summary": {
+    "total_recommendations": 1,
+    "already_implemented": 0,
+    "implemented": 1,
+    "deferred": 0,
+    "rejected": 0
+  },
+  "next_actions": [
+    "Review the updated configuration file to ensure it works correctly",
+    "Test that the academic theme properly uses the global mermaid_theme default",
+    "Consider committing this change to address the Gemini review feedback"
+  ]
+}
