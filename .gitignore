@@ -9,3 +9,4 @@ converted/
 *.log
 venv/
 .venv/
+.worktrees/
