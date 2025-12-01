@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git worktree add:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(git push:*)",
+      "Bash(del \"c:\\Workspace\\md2pdf-repo\\.user\\gemini-decisions\\pr1-decisions-test.json\")",
+      "Bash(del \"c:\\Workspace\\md2pdf-repo\\.user\\gemini-decisions\\gemini-recommendations.md\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

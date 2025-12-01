@@ -10,3 +10,5 @@ converted/
 venv/
 .venv/
 .worktrees/
+.user/
+nul
