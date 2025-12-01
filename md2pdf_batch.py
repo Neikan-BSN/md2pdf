@@ -8,6 +8,7 @@ settings (format, theme, output directory).
 
 import argparse
 import glob
+import json as json_module
 import sys
 from pathlib import Path
 from typing import List, Optional, Dict, Any
@@ -124,6 +125,31 @@ def convert_file(
         }
 
 
+def process_batch(
+    files: List[Path],
+    format: str,
+    theme: str,
+    output_dir: Optional[Path] = None
+) -> List[Dict[str, Any]]:
+    """
+    Process multiple files sequentially.
+
+    Args:
+        files: List of markdown files
+        format: Output format
+        theme: Theme name
+        output_dir: Custom output directory
+
+    Returns:
+        List of result dicts from convert_file
+    """
+    results = []
+    for f in files:
+        result = convert_file(f, format, theme, output_dir)
+        results.append(result)
+    return results
+
+
 def parse_args(args=None):
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -178,22 +204,59 @@ def main(args=None):
     """Main entry point for batch conversion CLI."""
     parsed = parse_args(args)
 
-    # Placeholder: validate arguments
-    if parsed.output_mode == "custom" and not parsed.output_dir:
-        print("Error: --output-dir required when --output-mode is custom", file=sys.stderr)
+    try:
+        # Resolve files
+        files = resolve_files(parsed.files)
+
+        # Determine output directory
+        output_dir = Path(parsed.output_dir) if parsed.output_mode == "custom" else None
+
+        # Process files
+        results = process_batch(
+            files=files,
+            format=parsed.format,
+            theme=parsed.theme,
+            output_dir=output_dir
+        )
+
+        # Calculate summary
+        success_count = sum(1 for r in results if r["success"])
+
+        # Output results
+        if parsed.json_output:
+            output = {
+                "total": len(results),
+                "success": success_count,
+                "failed": len(results) - success_count,
+                "results": [
+                    {
+                        "input": str(r["input"]),
+                        "output": str(r["output"]) if r["output"] else None,
+                        "success": r["success"],
+                        "error": r["error"]
+                    }
+                    for r in results
+                ]
+            }
+            print(json_module.dumps(output, indent=2))
+        else:
+            # Human-readable output
+            print(f"Converted {success_count}/{len(results)} files")
+            for r in results:
+                status = "+" if r["success"] else "x"
+                if r["success"]:
+                    print(f"  {status} {r['input'].name} -> {r['output'].name}")
+                else:
+                    print(f"  {status} {r['input'].name} ({r['error']})")
+
+        return 0 if success_count == len(results) else 1
+
+    except FileNotFoundError as e:
+        if parsed.json_output:
+            print(json_module.dumps({"error": str(e)}))
+        else:
+            print(f"Error: {e}", file=sys.stderr)
         return 1
-
-    # Placeholder: actual conversion logic
-    print(f"Batch conversion initialized")
-    print(f"  Files: {parsed.files}")
-    print(f"  Format: {parsed.format}")
-    print(f"  Theme: {parsed.theme}")
-    print(f"  Output mode: {parsed.output_mode}")
-    if parsed.output_dir:
-        print(f"  Output dir: {parsed.output_dir}")
-    print(f"  JSON output: {parsed.json_output}")
-
-    return 0
 
 
 if __name__ == "__main__":

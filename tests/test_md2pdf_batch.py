@@ -2,10 +2,11 @@
 
 import subprocess
 import sys
+import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from md2pdf_batch import resolve_files, convert_file
+from md2pdf_batch import resolve_files, convert_file, process_batch
 
 
 def test_cli_help():
@@ -94,3 +95,46 @@ def test_convert_file_html(tmp_path):
     assert result["success"] is True
     assert result["output"].suffix == ".html"
     assert result["output"].exists()
+
+
+def test_process_batch(tmp_path):
+    """Test batch processing multiple files."""
+    (tmp_path / "doc1.md").write_text("# Doc 1")
+    (tmp_path / "doc2.md").write_text("# Doc 2")
+
+    files = [tmp_path / "doc1.md", tmp_path / "doc2.md"]
+
+    results = process_batch(
+        files=files,
+        format="html",
+        theme="academic",
+        output_dir=None
+    )
+
+    assert len(results) == 2
+    assert all(r["success"] for r in results)
+    assert (tmp_path / "doc1.html").exists()
+    assert (tmp_path / "doc2.html").exists()
+
+
+def test_cli_json_output(tmp_path):
+    """Test CLI with --json-output flag."""
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Test")
+
+    result = subprocess.run(
+        [
+            sys.executable, "md2pdf_batch.py",
+            "--files", str(md_file),
+            "--format", "html",
+            "--json-output"
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 0
+    output = json.loads(result.stdout)
+    assert output["total"] == 1
+    assert output["success"] == 1
+    assert len(output["results"]) == 1
