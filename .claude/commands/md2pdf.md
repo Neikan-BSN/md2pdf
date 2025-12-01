@@ -131,13 +131,18 @@ Create the `.claude/config/` directory if it doesn't exist.
 
 When batch contains 6 or more files:
 
-1. Count files and split into chunks of ~4 files each (max 5 chunks)
-2. Spawn parallel Task agents with `model: haiku`
-3. Each agent runs: `python md2pdf_batch.py --files <chunk> --format <format> --theme <theme> --json-output`
-4. Collect JSON results from all agents
-5. Merge results and report consolidated summary
+1. **Calculate chunk count:** `num_chunks = min(5, ceil(file_count / 4))`
+   - 6-8 files → 2 chunks
+   - 9-12 files → 3 chunks
+   - 13-16 files → 4 chunks
+   - 17+ files → 5 chunks
+2. Distribute files evenly across chunks
+3. Spawn parallel Task agents with `model: haiku`
+4. Each agent runs: `python md2pdf_batch.py --files <chunk> --format <format> --theme <theme> --json-output`
+5. Collect JSON results from all agents
+6. Merge results and report consolidated summary
 
-Example for 12 files:
+Example for 12 files (3 chunks):
 ```
 Agent 1: file1.md file2.md file3.md file4.md
 Agent 2: file5.md file6.md file7.md file8.md

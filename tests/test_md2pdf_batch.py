@@ -6,7 +6,14 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from md2pdf_batch import resolve_files, convert_file, process_batch
+from md2pdf_batch import (
+    resolve_files,
+    convert_file,
+    process_batch,
+    load_skill_config,
+    save_skill_config,
+    DEFAULT_CONFIG,
+)
 
 
 def test_cli_help():
@@ -162,11 +169,29 @@ def test_invalid_theme_error(tmp_path):
     assert "theme" in output["error"].lower()
 
 
+def test_custom_output_mode_requires_output_dir(tmp_path):
+    """Test error when --output-mode=custom but --output-dir not provided."""
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Test")
+
+    result = subprocess.run(
+        [
+            sys.executable, "md2pdf_batch.py",
+            "--files", str(md_file),
+            "--output-mode", "custom"
+            # Missing --output-dir
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 1
+    assert "--output-dir is required" in result.stdout
+
+
 def test_load_skill_config_default(tmp_path, monkeypatch):
     """Test loading default config when none exists."""
     monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path))
-
-    from md2pdf_batch import load_skill_config, DEFAULT_CONFIG
 
     config = load_skill_config()
 
@@ -178,8 +203,6 @@ def test_load_skill_config_default(tmp_path, monkeypatch):
 def test_save_and_load_config(tmp_path, monkeypatch):
     """Test saving and loading config."""
     monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path))
-
-    from md2pdf_batch import load_skill_config, save_skill_config
 
     custom = {
         "defaults": {

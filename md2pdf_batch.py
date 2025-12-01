@@ -90,7 +90,7 @@ def resolve_files(patterns: List[str]) -> List[Path]:
         matches = glob.glob(pattern, recursive=True)
         files = [Path(m) for m in matches if Path(m).is_file()]
 
-        if not files and not path.is_file():
+        if not files:
             raise FileNotFoundError(f"No files found matching: {pattern}")
 
         resolved.extend(files)
@@ -245,7 +245,7 @@ def parse_args(args=None):
 
     parser.add_argument(
         "--output-dir",
-        type=str,
+        type=Path,
         default=None,
         help="Custom output directory (required if --output-mode is custom)"
     )
@@ -263,6 +263,11 @@ def main(args=None):
     """Main entry point for batch conversion CLI."""
     parsed = parse_args(args)
 
+    # Validate output_dir is provided when output_mode is custom
+    if parsed.output_mode == "custom" and not parsed.output_dir:
+        print("Error: --output-dir is required when --output-mode=custom")
+        return 1
+
     try:
         # Validate theme first
         validate_theme(parsed.theme)
@@ -271,7 +276,7 @@ def main(args=None):
         files = resolve_files(parsed.files)
 
         # Determine output directory
-        output_dir = Path(parsed.output_dir) if parsed.output_mode == "custom" else None
+        output_dir = parsed.output_dir if parsed.output_mode == "custom" else None
 
         # Process files
         results = process_batch(
