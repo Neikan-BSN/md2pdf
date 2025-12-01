@@ -16,6 +16,7 @@ from typing import List, Optional, Dict, Any
 from document_builder import build_html_document
 from renderer_client import RendererClient
 from config_loader import load_config
+from theme_manager import list_themes
 
 
 def resolve_files(patterns: List[str]) -> List[Path]:
@@ -54,6 +55,20 @@ def resolve_files(patterns: List[str]) -> List[Path]:
         raise FileNotFoundError("No files found")
 
     return sorted(set(resolved))
+
+
+def validate_theme(theme: str) -> None:
+    """
+    Validate theme exists.
+
+    Raises:
+        ValueError: If theme not found
+    """
+    available = list_themes()
+    if theme not in available:
+        raise ValueError(
+            f"Theme '{theme}' not found. Available: {', '.join(available)}"
+        )
 
 
 def convert_file(
@@ -205,6 +220,9 @@ def main(args=None):
     parsed = parse_args(args)
 
     try:
+        # Validate theme first
+        validate_theme(parsed.theme)
+
         # Resolve files
         files = resolve_files(parsed.files)
 
@@ -251,7 +269,7 @@ def main(args=None):
 
         return 0 if success_count == len(results) else 1
 
-    except FileNotFoundError as e:
+    except (FileNotFoundError, ValueError) as e:
         if parsed.json_output:
             print(json_module.dumps({"error": str(e)}))
         else:

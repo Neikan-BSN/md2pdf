@@ -138,3 +138,25 @@ def test_cli_json_output(tmp_path):
     assert output["total"] == 1
     assert output["success"] == 1
     assert len(output["results"]) == 1
+
+
+def test_invalid_theme_error(tmp_path):
+    """Test error on invalid theme."""
+    md_file = tmp_path / "test.md"
+    md_file.write_text("# Test")
+
+    result = subprocess.run(
+        [
+            sys.executable, "md2pdf_batch.py",
+            "--files", str(md_file),
+            "--theme", "nonexistent_theme",
+            "--json-output"
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 1
+    output = json.loads(result.stdout)
+    assert "error" in output
+    assert "theme" in output["error"].lower()
