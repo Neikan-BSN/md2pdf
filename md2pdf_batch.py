@@ -10,7 +10,11 @@ import argparse
 import glob
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+
+from document_builder import build_html_document
+from renderer_client import RendererClient
+from config_loader import load_config
 
 
 def resolve_files(patterns: List[str]) -> List[Path]:
@@ -49,6 +53,75 @@ def resolve_files(patterns: List[str]) -> List[Path]:
         raise FileNotFoundError("No files found")
 
     return sorted(set(resolved))
+
+
+def convert_file(
+    input_file: Path,
+    format: str,
+    theme: str,
+    output_dir: Optional[Path] = None
+) -> Dict[str, Any]:
+    """
+    Convert a single markdown file.
+
+    Args:
+        input_file: Path to markdown file
+        format: Output format ('pdf' or 'html')
+        theme: Theme name
+        output_dir: Custom output directory (None = same as input)
+
+    Returns:
+        Dict with success, input, output, error keys
+    """
+    try:
+        # Determine output path
+        if output_dir:
+            output_path = output_dir / f"{input_file.stem}.{format}"
+        else:
+            output_path = input_file.parent / f"{input_file.stem}.{format}"
+
+        # Read markdown
+        md_content = input_file.read_text(encoding="utf-8")
+
+        # Load config
+        config = load_config()
+
+        # Build HTML
+        html = build_html_document(md_content, theme, config)
+
+        # Convert based on format
+        if format == "pdf":
+            pdf_opts = config.get("pdf_options", {})
+            render_options = {
+                "format": pdf_opts.get("page_size", "letter"),
+                "printBackground": pdf_opts.get("print_background", True),
+                "margin": pdf_opts.get("margins", {
+                    "top": "1in", "bottom": "1in",
+                    "left": "1in", "right": "1in"
+                })
+            }
+
+            with RendererClient() as client:
+                pdf_bytes = client.render_pdf(html, render_options)
+
+            output_path.write_bytes(pdf_bytes)
+        else:
+            output_path.write_text(html, encoding="utf-8")
+
+        return {
+            "success": True,
+            "input": input_file,
+            "output": output_path,
+            "error": None
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "input": input_file,
+            "output": None,
+            "error": str(e)
+        }
 
 
 def parse_args(args=None):
