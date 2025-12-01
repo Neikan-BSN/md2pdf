@@ -6,11 +6,15 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Detect if running in Docker
+// Detect if running in Docker or Windows
 const isDocker = process.env.DOCKER === 'true' || fs.existsSync('/.dockerenv');
+const isWindows = process.platform === 'win32';
 
 if (isDocker) {
     console.log('⚠️  Running in Docker: Sandbox disabled for compatibility');
+}
+if (isWindows) {
+    console.log('⚠️  Running on Windows: Sandbox disabled for compatibility');
 }
 
 // Concurrency limiting
@@ -89,7 +93,12 @@ app.post('/render/pdf', async (req, res) => {
         // Launch Puppeteer
         browser = await puppeteer.launch({
             headless: 'new',
-            args: isDocker ? ['--no-sandbox', '--disable-setuid-sandbox'] : []
+            args: (isDocker || isWindows) ? [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu'
+            ] : []
         });
 
         const page = await browser.newPage();
