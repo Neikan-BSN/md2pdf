@@ -7,9 +7,48 @@ settings (format, theme, output directory).
 """
 
 import argparse
+import glob
 import sys
 from pathlib import Path
 from typing import List, Optional
+
+
+def resolve_files(patterns: List[str]) -> List[Path]:
+    """
+    Resolve file patterns to actual file paths.
+
+    Args:
+        patterns: List of file paths or glob patterns
+
+    Returns:
+        List of resolved Path objects
+
+    Raises:
+        FileNotFoundError: If no files found
+    """
+    resolved = []
+
+    for pattern in patterns:
+        path = Path(pattern)
+
+        # Direct file path
+        if path.is_file():
+            resolved.append(path)
+            continue
+
+        # Glob pattern
+        matches = glob.glob(pattern, recursive=True)
+        files = [Path(m) for m in matches if Path(m).is_file()]
+
+        if not files and not path.is_file():
+            raise FileNotFoundError(f"No files found matching: {pattern}")
+
+        resolved.extend(files)
+
+    if not resolved:
+        raise FileNotFoundError("No files found")
+
+    return sorted(set(resolved))
 
 
 def parse_args(args=None):
