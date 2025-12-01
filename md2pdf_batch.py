@@ -7,8 +7,10 @@ settings (format, theme, output directory).
 """
 
 import argparse
+import copy
 import glob
 import json as json_module
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional, Dict, Any
@@ -17,6 +19,48 @@ from document_builder import build_html_document
 from renderer_client import RendererClient
 from config_loader import load_config
 from theme_manager import list_themes
+
+
+DEFAULT_CONFIG = {
+    "defaults": {
+        "format": "pdf",
+        "theme": "academic",
+        "output_mode": "same-dir"
+    },
+    "prompt_behavior": {
+        "always_confirm": False,
+        "prompt_on_batch": True
+    }
+}
+
+
+def get_config_path() -> Path:
+    """Get path to skill config file."""
+    config_dir = os.environ.get("CLAUDE_CONFIG_DIR", ".claude/config")
+    return Path(config_dir) / "md2pdf-skill.json"
+
+
+def load_skill_config() -> Dict[str, Any]:
+    """Load skill configuration, returning defaults if not found."""
+    config_path = get_config_path()
+
+    if config_path.exists():
+        try:
+            return json_module.loads(config_path.read_text(encoding="utf-8"))
+        except (json_module.JSONDecodeError, IOError):
+            return copy.deepcopy(DEFAULT_CONFIG)
+
+    return copy.deepcopy(DEFAULT_CONFIG)
+
+
+def save_skill_config(config: Dict[str, Any]) -> None:
+    """Save skill configuration."""
+    config_path = get_config_path()
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(
+        json_module.dumps(config, indent=2),
+        encoding="utf-8"
+    )
 
 
 def resolve_files(patterns: List[str]) -> List[Path]:

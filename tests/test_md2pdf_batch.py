@@ -160,3 +160,40 @@ def test_invalid_theme_error(tmp_path):
     output = json.loads(result.stdout)
     assert "error" in output
     assert "theme" in output["error"].lower()
+
+
+def test_load_skill_config_default(tmp_path, monkeypatch):
+    """Test loading default config when none exists."""
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path))
+
+    from md2pdf_batch import load_skill_config, DEFAULT_CONFIG
+
+    config = load_skill_config()
+
+    assert config == DEFAULT_CONFIG
+    assert config["defaults"]["format"] == "pdf"
+    assert config["defaults"]["theme"] == "academic"
+
+
+def test_save_and_load_config(tmp_path, monkeypatch):
+    """Test saving and loading config."""
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path))
+
+    from md2pdf_batch import load_skill_config, save_skill_config
+
+    custom = {
+        "defaults": {
+            "format": "html",
+            "theme": "modern",
+            "output_mode": "same-dir"
+        },
+        "prompt_behavior": {
+            "always_confirm": True,
+            "prompt_on_batch": False
+        }
+    }
+
+    save_skill_config(custom)
+    loaded = load_skill_config()
+
+    assert loaded == custom
