@@ -197,3 +197,56 @@ def test_save_and_load_config(tmp_path, monkeypatch):
     loaded = load_skill_config()
 
     assert loaded == custom
+
+
+def test_full_cli_html_conversion(tmp_path):
+    """Integration test: full CLI HTML conversion."""
+    # Create test file
+    md_file = tmp_path / "integration_test.md"
+    md_file.write_text("# Integration Test\n\nThis is a test document.")
+
+    # Run CLI
+    result = subprocess.run(
+        [
+            sys.executable, "md2pdf_batch.py",
+            "--files", str(md_file),
+            "--format", "html",
+            "--theme", "minimal"
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 0
+    assert "Converted 1/1" in result.stdout
+
+    # Verify output file
+    html_file = tmp_path / "integration_test.html"
+    assert html_file.exists()
+    content = html_file.read_text()
+    assert "Integration Test" in content
+
+
+def test_full_cli_batch_conversion(tmp_path):
+    """Integration test: batch conversion."""
+    # Create multiple files
+    for i in range(3):
+        (tmp_path / f"batch{i}.md").write_text(f"# Batch Doc {i}")
+
+    # Run CLI
+    result = subprocess.run(
+        [
+            sys.executable, "md2pdf_batch.py",
+            "--files", str(tmp_path / "batch*.md"),
+            "--format", "html"
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    assert result.returncode == 0
+    assert "Converted 3/3" in result.stdout
+
+    # Verify all outputs exist
+    for i in range(3):
+        assert (tmp_path / f"batch{i}.html").exists()

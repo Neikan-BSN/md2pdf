@@ -19,77 +19,136 @@ Convert markdown files to PDF or HTML using the md2pdf renderer.
 ## Behavior
 
 1. **Parse input** - Extract file path(s) from arguments
-2. **Resolve files** - Expand globs, validate files exist
+2. **Validate files** - Check files exist before prompting
 3. **Load config** - Read defaults from `.claude/config/md2pdf-skill.json`
-4. **Present settings** - Show current defaults
-5. **Prompt if needed** - Ask to override defaults
+4. **Present settings** - Show file count and current defaults
+5. **Prompt if needed** - Ask to proceed or customize
 6. **Execute conversion** - Run `md2pdf_batch.py`
-7. **Report results** - Show success/failure summary
+7. **Report results** - Show success/failure for each file
 8. **Offer to save** - Ask to save settings as new defaults
 
 ## Instructions
 
 When this skill is invoked with file arguments:
 
-1. Extract the file pattern from the user's command (everything after `/md2pdf `)
+### Step 1: Extract Pattern
+Extract the file pattern from the user's command (everything after `/md2pdf `).
+Remove any surrounding quotes from the pattern.
 
-2. Run file resolution:
-   ```bash
-   python md2pdf_batch.py --files "<pattern>" --json-output --format pdf --theme academic 2>&1 | head -1
-   ```
-   Check if this returns an error. If files not found, report and stop.
+### Step 2: Validate Files Exist
+Run validation with `--json-output` to get machine-readable result:
+```bash
+python md2pdf_batch.py --files <pattern> --format html --json-output
+```
 
-3. Load skill config if exists:
-   ```bash
-   cat .claude/config/md2pdf-skill.json 2>/dev/null || echo '{"defaults":{"format":"pdf","theme":"academic"}}'
-   ```
+**Check the JSON output:**
+- If output contains `"error":` key at top level, files not found - report error and stop
+- If output contains `"total":` key, files were found - continue
 
-4. Report to user:
-   ```
-   Found N file(s) to convert
-   Current settings: PDF format, academic theme
+Example error: `{"error": "No files found matching: missing.md"}`
+Example success: `{"total": 2, "success": 2, ...}`
 
-   Proceed with these settings? [Y/n/customize]
-   ```
+### Step 3: Load Config
+```bash
+cat .claude/config/md2pdf-skill.json 2>/dev/null
+```
 
-5. If user says customize (c), prompt for:
-   - Format: pdf or html
-   - Theme: academic, clinical, journal, minimal, modern, or presentation
+If file doesn't exist, use defaults: `{"defaults":{"format":"pdf","theme":"academic","output_mode":"same-dir"}}`
 
-6. Execute conversion:
-   ```bash
-   python md2pdf_batch.py --files "<pattern>" --format <format> --theme <theme>
-   ```
+### Step 4: Present Settings
+Report to user:
+```
+Found N file(s) to convert:
+  - file1.md
+  - file2.md
 
-7. Report results from output
+Current settings: <format> format, <theme> theme
 
-8. If successful, ask:
-   ```
-   Save these settings as defaults? [y/N]
-   ```
-   If yes, update `.claude/config/md2pdf-skill.json`
+Proceed? [Y]es / [n]o / [c]ustomize
+```
+
+### Step 5: Handle Response
+
+**If Y or yes (default):** Proceed with current settings
+
+**If n or no:** Cancel and exit
+
+**If c or customize:** Prompt for each setting:
+```
+Output format:
+  1. pdf
+  2. html
+Select [1-2]:
+
+Theme (run 'python -c "from theme_manager import list_themes; print(list_themes())"' to see current list):
+  1. academic
+  2. clinical
+  3. journal
+  4. minimal
+  5. modern
+  6. presentation
+Select [1-6]:
+```
+
+### Step 6: Execute Conversion
+
+**For 1-5 files (sequential):**
+```bash
+python md2pdf_batch.py --files <pattern> --format <format> --theme <theme>
+```
+
+**For 6+ files (parallel):** See Parallel Processing section below.
+
+### Step 7: Report Results
+Parse output and report:
+```
+Converted N/M files:
+  + file1.md -> file1.pdf
+  + file2.md -> file2.pdf
+  x file3.md (error message)
+```
+
+### Step 8: Offer to Save
+If conversion succeeded and settings differ from saved config:
+```
+Save these settings as defaults? [y/N]
+```
+
+**If y or yes:** Write to `.claude/config/md2pdf-skill.json`:
+```json
+{
+  "defaults": {
+    "format": "<format>",
+    "theme": "<theme>",
+    "output_mode": "same-dir"
+  }
+}
+```
+
+Create the `.claude/config/` directory if it doesn't exist.
 
 ## Parallel Processing (6+ files)
 
 When batch contains 6 or more files:
 
-1. Split files into chunks of ~4 files each
-2. Spawn parallel Task agents (max 5) with model=haiku
-3. Each agent runs: `python md2pdf_batch.py --files <chunk> --json-output ...`
+1. Count files and split into chunks of ~4 files each (max 5 chunks)
+2. Spawn parallel Task agents with `model: haiku`
+3. Each agent runs: `python md2pdf_batch.py --files <chunk> --format <format> --theme <theme> --json-output`
 4. Collect JSON results from all agents
-5. Report consolidated summary
+5. Merge results and report consolidated summary
 
-Example parallel dispatch:
+Example for 12 files:
 ```
-Files: doc1.md doc2.md doc3.md doc4.md doc5.md doc6.md doc7.md doc8.md
-
-Agent 1: doc1.md doc2.md doc3.md doc4.md
-Agent 2: doc5.md doc6.md doc7.md doc8.md
+Agent 1: file1.md file2.md file3.md file4.md
+Agent 2: file5.md file6.md file7.md file8.md
+Agent 3: file9.md file10.md file11.md file12.md
 ```
 
 ## Error Handling
 
-- File not found: Report error, do not proceed
-- Invalid theme: Report available themes
-- Renderer failure: Report which files failed, continue with others
-- Partial batch failure: Report summary with successes and failures
+| Error | Action |
+|-------|--------|
+| Files not found | Report error with pattern, do not proceed |
+| Invalid theme | Report: "Theme 'X' not found. Available: academic, clinical, ..." |
+| Renderer timeout | Report which file failed, continue with remaining files |
+| Partial failure | Report summary showing successes and failures |
